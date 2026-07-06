@@ -3,6 +3,7 @@ import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { COURSES } from '../../constants/courses';
+import { useAuth } from '../../context/AuthContext';
 
 // ─── Reusable sub-components ────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
   const [profile, setProfile] = useState(null);   // authoritative data from DB
   const [formData, setFormData] = useState({});     // working copy for edit mode
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
+  const { updateUser } = useAuth();
   const fileInputRef = useRef(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -60,11 +62,8 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
       setProfile(prev => ({ ...prev, avatar_url: newUrl }));
       setFormData(prev => ({ ...prev, avatar_url: newUrl }));
       
-      const stored = JSON.parse(localStorage.getItem('user') || '{}');
-      localStorage.setItem('user', JSON.stringify({ ...stored, avatar_url: newUrl }));
+      updateUser({ avatar_url: newUrl });
       
-      // Dispatch storage event to notify other components (like Navbar) if they're listening
-      window.dispatchEvent(new Event('storage')); 
       toast.success('Avatar updated successfully!');
     } catch (err) {
       console.error(err);
@@ -107,9 +106,7 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
       const updated = res.data.user;
       setProfile(updated);
       setFormData(updated);
-      // Sync localStorage so navbar / routes reflect new name etc.
-      const stored = JSON.parse(localStorage.getItem('user') || '{}');
-      localStorage.setItem('user', JSON.stringify({ ...stored, ...updated }));
+      updateUser(updated);
       toast.success('Profile updated!');
       setIsEditing(false);
     } catch (err) {
