@@ -17,14 +17,36 @@ const AIChatTab = () => {
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Clear history on mount so every refresh is a new session
-        await api.delete('/chatbot/history');
+        // Check if this is a new browser session
+        const isNewBrowserSession = !sessionStorage.getItem('chatSessionStarted');
+        
+        if (isNewBrowserSession) {
+          // It's a new browser session (e.g. they just opened the tab), clear the history in DB
+          await api.delete('/chatbot/history');
+          sessionStorage.setItem('chatSessionStarted', 'true');
+          
+          setMessages([
+            { role: 'ai', text: 'Hello! I am your BoostMe AI Assistant. I can help you find a mentor, book an appointment, or just be here to listen if you need to talk. How can I help you today?' }
+          ]);
+        } else {
+          // They are just navigating within the same tab, fetch history
+          const res = await api.get('/chatbot/history');
+          const history = res.data;
+          
+          if (history && history.length > 0) {
+            setMessages(history);
+          } else {
+            setMessages([
+              { role: 'ai', text: 'Hello! I am your BoostMe AI Assistant. I can help you find a mentor, book an appointment, or just be here to listen if you need to talk. How can I help you today?' }
+            ]);
+          }
+        }
       } catch (err) {
-        console.error('Failed to clear history on mount', err);
-      } finally {
+        console.error('Failed to initialize session', err);
         setMessages([
           { role: 'ai', text: 'Hello! I am your BoostMe AI Assistant. I can help you find a mentor, book an appointment, or just be here to listen if you need to talk. How can I help you today?' }
         ]);
+      } finally {
         setIsFetchingHistory(false);
       }
     };
@@ -42,22 +64,68 @@ const AIChatTab = () => {
     const userMessage = input.trim();
     setInput('');
     
-    const updatedMessages = [...messages, { role: 'user', text: userMessage }];
-    setMessages(updatedMessages);
+    const aiMessageId = Date.now();
+    setMessages(prev => [
+      ...prev, 
+      { role: 'user', text: userMessage },
+      { role: 'ai', text: '', id: aiMessageId }
+    ]);
     setIsLoading(true);
 
     try {
-      const res = await api.post('/chatbot/chat', { message: userMessage });
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await fetch('/api/chatbot/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: userMessage })
+      });
 
-      if (res.data && res.data.reply) {
-        setMessages([...updatedMessages, { role: 'ai', text: res.data.reply }]);
-      } else {
-        throw new Error('No reply from server');
+      if (!response.ok) throw new Error('Network error');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      
+      let aiResponseText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        setIsLoading(false); // Stop loading animation once streaming starts
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n\n');
+
+        for (let line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '');
+            if (dataStr === '[DONE]') break;
+            
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.text) {
+                aiResponseText += parsed.text;
+                setMessages(prev => prev.map(msg => 
+                  msg.id === aiMessageId ? { ...msg, text: aiResponseText } : msg
+                ));
+              } else if (parsed.error) {
+                toast.error(parsed.error);
+              }
+            } catch (e) {
+              // Ignore partial JSON chunks
+            }
+          }
+        }
       }
     } catch (err) {
       console.error(err);
       toast.error('Failed to get response from AI');
-      setMessages([...updatedMessages, { role: 'ai', text: 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessageId ? { ...msg, text: 'Sorry, I am having trouble connecting right now. Please try again later.' } : msg
+      ));
     } finally {
       setIsLoading(false);
     }

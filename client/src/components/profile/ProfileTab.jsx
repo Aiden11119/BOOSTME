@@ -55,9 +55,7 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
 
     setIsUploadingAvatar(true);
     try {
-      const res = await api.post('/users/profile/avatar', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/users/profile/avatar', uploadData);
       const newUrl = res.data.avatar_url;
       setProfile(prev => ({ ...prev, avatar_url: newUrl }));
       setFormData(prev => ({ ...prev, avatar_url: newUrl }));
