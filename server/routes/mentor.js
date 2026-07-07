@@ -23,7 +23,7 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/slots/:mentor_id', verifyToken, async (req, res) => {
   try {
     const [slots] = await pool.query(
-      'SELECT appointment_id as slot_id, appointment_date as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = "available" AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
+      'SELECT appointment_id as slot_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = "available" AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
       [req.params.mentor_id]
     );
     res.json(slots);
@@ -40,7 +40,7 @@ router.get('/day-slots', verifyToken, verifyRole(['mentor']), async (req, res) =
     if (!date) return res.status(400).json({ message: 'Date is required' });
     
     const [slots] = await pool.query(
-      'SELECT * FROM appointments WHERE mentor_id = ? AND appointment_date = ? ORDER BY start_time',
+      'SELECT appointment_id, mentor_id, student_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as appointment_date, start_time, end_time, status, created_at FROM appointments WHERE mentor_id = ? AND appointment_date = ? ORDER BY start_time',
       [req.user.userId, date]
     );
     res.json(slots);
@@ -171,7 +171,7 @@ router.get('/mentor', verifyToken, verifyRole(['mentor']), async (req, res) => {
 
   try {
     const [appointments] = await pool.query(`
-      SELECT a.*, u.full_name as student_name, u.email as student_email, u.avatar_url, u.student_id_number 
+      SELECT a.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, u.full_name as student_name, u.email as student_email, u.avatar_url, u.student_id_number 
       FROM appointments a
       JOIN users u ON a.student_id = u.id
       WHERE a.mentor_id = ? AND a.status != 'available'
@@ -191,7 +191,7 @@ router.get('/student', verifyToken, verifyRole(['student']), async (req, res) =>
 
   try {
     const [appointments] = await pool.query(`
-      SELECT a.*, u.full_name as mentor_name, u.email as mentor_email, u.avatar_url 
+      SELECT a.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, u.full_name as mentor_name, u.email as mentor_email, u.avatar_url 
       FROM appointments a
       JOIN users u ON a.mentor_id = u.id
       WHERE a.student_id = ?

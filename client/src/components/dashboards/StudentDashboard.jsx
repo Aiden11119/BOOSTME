@@ -515,54 +515,89 @@ const MentorsTab = () => {
           )}
         </>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          {myBookings.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">You have no upcoming bookings.</div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {myBookings.map(booking => {
-                  // Determine if the session is in the past (completed)
-                  const apptDateTime = new Date(`${booking.appointment_date.split('T')[0]}T${booking.end_time}`);
-                  const isDone = booking.status !== 'cancelled' && apptDateTime < new Date();
+        <div className="space-y-8">
+          {(() => {
+            const upcomingBookings = [];
+            const pastBookings = [];
+            
+            myBookings.forEach(booking => {
+              const apptDateTime = new Date(`${booking.appointment_date.split('T')[0]}T${booking.end_time}`);
+              if (booking.status === 'cancelled' || apptDateTime < new Date()) {
+                pastBookings.push(booking);
+              } else {
+                upcomingBookings.push(booking);
+              }
+            });
 
-                  return (
-                  <div key={booking.appointment_id} className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <img src={booking.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${String(booking.mentor_name || 'Mentor').replace(/[^a-zA-Z]/g, '')}`} alt="mentor" className="w-12 h-12 rounded-full border border-gray-200 bg-gray-100" />
-                      <div>
-                        <h3 className="font-bold text-gray-900">{booking.mentor_name}</h3>
-                        <p className="text-sm text-gray-500">{booking.mentor_email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                      <div className="flex items-center gap-2 text-gray-600 bg-gray-100 px-4 py-2 rounded-xl">
-                        <Clock className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium">
-                          {new Date(booking.appointment_date).toLocaleDateString()} at {booking.start_time.substring(0,5)}
-                        </span>
-                      </div>
-                      {booking.status === 'cancelled' ? (
-                        <span className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-xl">
-                          Cancelled
-                        </span>
-                      ) : isDone ? (
-                        <span className="px-4 py-2 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-xl flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4" /> Done
-                        </span>
-                      ) : (
-                        <button 
-                          onClick={() => setCancelPromptId(booking.appointment_id)}
-                          className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors"
-                        >
-                          Cancel Booking
-                        </button>
-                      )}
+            const renderBooking = (booking) => {
+              const apptDateTime = new Date(`${booking.appointment_date.split('T')[0]}T${booking.end_time}`);
+              const isDone = booking.status !== 'cancelled' && apptDateTime < new Date();
+
+              return (
+                <div key={booking.appointment_id} className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <img src={booking.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${String(booking.mentor_name || 'Mentor').replace(/[^a-zA-Z]/g, '')}`} alt="mentor" className="w-12 h-12 rounded-full border border-gray-200 bg-gray-100" />
+                    <div>
+                      <h3 className="font-bold text-gray-900">{booking.mentor_name}</h3>
+                      <p className="text-sm text-gray-500">{booking.mentor_email}</p>
                     </div>
                   </div>
-                  );
-              })}
-            </div>
-          )}
+                  <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="flex items-center gap-2 text-gray-600 bg-gray-100 px-4 py-2 rounded-xl">
+                      <Clock className="w-4 h-4 text-purple-600" />
+                      <span className="text-sm font-medium">
+                        {new Date(booking.appointment_date).toLocaleDateString()} at {booking.start_time.substring(0,5)}
+                      </span>
+                    </div>
+                    {booking.status === 'cancelled' ? (
+                      <span className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-xl">
+                        Cancelled
+                      </span>
+                    ) : isDone ? (
+                      <span className="px-4 py-2 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-xl flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" /> Done
+                      </span>
+                    ) : (
+                      <button 
+                        onClick={() => setCancelPromptId(booking.appointment_id)}
+                        className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors"
+                      >
+                        Cancel Booking
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            };
+
+            return (
+              <>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 px-1">Upcoming Sessions</h3>
+                  <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    {upcomingBookings.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">You have no upcoming bookings.</div>
+                    ) : (
+                      <div className="flex flex-col">
+                        {upcomingBookings.map(renderBooking)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {pastBookings.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 px-1 mt-6">Past Sessions</h3>
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden opacity-80">
+                      <div className="flex flex-col">
+                        {pastBookings.map(renderBooking)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
 
