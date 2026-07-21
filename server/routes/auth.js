@@ -298,6 +298,20 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
+    // Check Maintenance Mode
+    const [settings] = await pool.query('SELECT setting_value FROM system_settings WHERE setting_key = "maintenance_mode"');
+    const isMaintenance = settings.length > 0 && settings[0].setting_value === 'true';
+    if (isMaintenance && user.role !== 'admin') {
+      return res.status(503).json({ 
+        message: 'The system is undergoing maintenance. Please try again later.' 
+      });
+    }
+
+    // Check if user is active
+    if (user.is_active === 0) {
+      return res.status(403).json({ message: 'Your account has been deactivated. Please contact the administrator.' });
+    }
+
     // Check password
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {

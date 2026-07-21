@@ -8,6 +8,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import api from '../../services/api';
 import ProfileTab from '../profile/ProfileTab';
+import GlobalAnnouncement from '../common/GlobalAnnouncement';
 
 const ScheduleTab = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -325,6 +326,7 @@ const MentorDashboard = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <GlobalAnnouncement />
         <Routes>
           <Route path="/" element={<ScheduleTab />} />
           <Route path="/schedule" element={<ScheduleTab />} />

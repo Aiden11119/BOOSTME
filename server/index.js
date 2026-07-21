@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/student');
 const lecturerRoutes = require('./routes/lecturer');
 const mentorRoutes = require('./routes/mentor');
+const adminRoutes = require('./routes/admin');
+const announcementsRoutes = require('./routes/announcements');
 
 const path = require('path');
 
@@ -28,6 +30,8 @@ app.use('/api/appointments', mentorRoutes); // For appointments (mentor/student)
 
 const chatbotRoutes = require('./routes/chatbot');
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/announcements', announcementsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

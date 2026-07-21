@@ -9,6 +9,7 @@ import ForgotPassword from './components/auth/ForgotPassword';
 import StudentDashboard from './components/dashboards/StudentDashboard';
 import LecturerDashboard from './components/dashboards/LecturerDashboard';
 import MentorDashboard from './components/dashboards/MentorDashboard';
+import AdminDashboard from './components/dashboards/admin/AdminDashboard';
 
 function App() {
   const { user, logout, isLoading } = useAuth();
@@ -56,6 +57,7 @@ function App() {
             <Route path="/student/*" element={userRole === 'student' ? <StudentDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/lecturer/*" element={userRole === 'lecturer' ? <LecturerDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/mentor/*" element={userRole === 'mentor' ? <MentorDashboard /> : <Navigate to="/login" replace />} />
+            <Route path="/admin/*" element={userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />} />
           </Routes>
         </main>
       </div>

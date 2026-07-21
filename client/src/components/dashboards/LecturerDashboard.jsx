@@ -6,6 +6,7 @@ import api from '../../services/api';
 import ProfileTab from '../profile/ProfileTab';
 import EmailModal from '../common/EmailModal';
 import { useAuth } from '../../context/AuthContext';
+import GlobalAnnouncement from '../common/GlobalAnnouncement';
 
 const DEPARTMENTS = ['Engineering', 'Business', 'CS', 'Mathematics'];
 const SEMESTERS = ['Y1S1', 'Y1S2', 'Y1S3', 'Y2S1', 'Y2S2', 'Y2S3', 'Y3S1', 'Y3S2', 'Y3S3'];
@@ -530,6 +531,7 @@ const LecturerDashboard = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <GlobalAnnouncement />
         <Routes>
           <Route path="/" element={<MonitorTab />} />
           <Route path="/monitor" element={<MonitorTab />} />

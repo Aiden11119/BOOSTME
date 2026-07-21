@@ -7,6 +7,7 @@ import ProfileTab from '../profile/ProfileTab';
 import EmailModal from '../common/EmailModal';
 import AIChatTab from '../chatbot/AIChatTab';
 import StressTestModal from './StressTestModal';
+import GlobalAnnouncement from '../common/GlobalAnnouncement';
 
 const formatGradeStr = (grade) => {
   const map = { 'A': 'A (80-100)', 'B': 'B (70-79)', 'C': 'C (60-69)', 'D': 'D (50-59)', 'F': 'F (0-49)' };
@@ -686,6 +687,7 @@ const StudentDashboard = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <GlobalAnnouncement />
         <Routes>
           <Route path="/" element={<PredictTab />} />
           <Route path="/predict" element={<PredictTab />} />

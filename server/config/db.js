@@ -23,11 +23,12 @@ const initializeDB = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        role ENUM('student', 'lecturer', 'mentor') NOT NULL,
+        role ENUM('student', 'lecturer', 'mentor', 'admin') NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         full_name VARCHAR(255) NOT NULL,
         avatar_url VARCHAR(255),
+        is_active BOOLEAN DEFAULT TRUE,
         
         -- Student fields
         student_id_number VARCHAR(100),
@@ -43,6 +44,14 @@ const initializeDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    try {
+      // Force update existing table structure just in case it already existed
+      await pool.query("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'lecturer', 'mentor', 'admin') NOT NULL");
+      await pool.query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+    } catch (alterErr) {
+      console.log('Note: ALTER users skipped or already applied.');
+    }
 
     // Create prediction_history table
     await pool.query(`
@@ -166,6 +175,19 @@ const initializeDB = async () => {
         message_text TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create announcements table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        admin_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
 
