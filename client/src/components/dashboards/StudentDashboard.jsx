@@ -75,6 +75,7 @@ const PredictTab = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [xaiExplanations, setXaiExplanations] = useState(null);
   
   const [courseSearch, setCourseSearch] = useState('');
   const [showCourseDropdown, setShowCourseDropdown] = useState(false);
@@ -140,6 +141,7 @@ const PredictTab = () => {
     try {
       const res = await api.post('/student/predict', formData);
       setResult(res.data.predicted_grade);
+      setXaiExplanations(res.data.xai_explanations || null);
       toast.success('Prediction generated!');
     } catch (err) {
       toast.error('Prediction failed');
@@ -283,6 +285,99 @@ const PredictTab = () => {
             </div>
           )}
         </div>
+      )}
+
+      {result && xaiExplanations && xaiExplanations.length > 0 && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 banner-animation" style={{ animationDelay: '0.1s' }}>
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Bot className="w-6 h-6 text-blue-600" /> Why this prediction?
+          </h3>
+          <div className="space-y-5">
+            {xaiExplanations.map((item, idx) => {
+              const isPositive = item.impact > 0;
+              // LIME impacts can be small floats (e.g. 0.05). Let's scale them nicely. 
+              // We'll normalize by the max impact to make the bars look good.
+              const maxImpact = Math.max(...xaiExplanations.map(x => Math.abs(x.impact)));
+              const normalizedImpact = maxImpact > 0 ? (Math.abs(item.impact) / maxImpact) * 100 : 0;
+              
+              // Feature name cleaner (remove LIME condition strings if present, though we might want them)
+              // We'll just display it as is.
+              
+              return (
+                <div key={idx} className="flex flex-col gap-1.5">
+                  <div className="flex justify-between text-sm font-medium text-gray-700">
+                    <span className="truncate pr-4">{item.feature}</span>
+                    <span className={isPositive ? 'text-green-600 font-semibold whitespace-nowrap' : 'text-red-600 font-semibold whitespace-nowrap'}>
+                      {isPositive ? 'Grade Booster (Strength)' : 'Grade Reducer (Risk)'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5 flex">
+                    <div 
+                      className={`h-2.5 rounded-full transition-all duration-1000 ease-out ${isPositive ? 'bg-green-500' : 'bg-red-500'}`} 
+                      style={{ width: `${normalizedImpact}%` }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+            {(() => {
+              const cleanFeatureName = (str) => {
+                if (str.includes("Study_Hours_per_Week")) return "Study Hours";
+                if (str.includes("Assignments_Avg")) return "Assignments Average";
+                if (str.includes("Quizzes_Avg")) return "Quizzes Average";
+                if (str.includes("Midterm_Score")) return "Midterm Score";
+                if (str.includes("Attendance")) return "Attendance Rate";
+                if (str.includes("Stress_Level")) return "Stress Level";
+                if (str.includes("Family_Income_Level")) return "Family Income";
+                if (str.includes("Department")) return "Department";
+                if (str.includes("Gender")) return "Gender";
+                return str.split(" ")[0];
+              };
+
+              const positiveFactors = xaiExplanations.filter(item => item.impact > 0).map(i => cleanFeatureName(i.feature));
+              const negativeFactors = xaiExplanations.filter(item => item.impact <= 0).map(i => cleanFeatureName(i.feature));
+              const isGoodGrade = result === 'A' || result === 'B';
+              const isAvgGrade = result === 'C';
+
+              return (
+                <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/80 rounded-2xl shadow-inner text-gray-800 space-y-3">
+                  <div className="flex items-center gap-2 font-bold text-blue-950 text-base">
+                    <Bot className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <span>AI Diagnostic & Guidance Narrative</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-gray-700">
+                    {isGoodGrade ? (
+                      <>
+                        <strong className="text-green-700">Excellent trajectory!</strong> Your predicted grade of <strong>{formatGradeStr(result)}</strong> is heavily supported by your strong academic profile. 
+                        In particular, your {positiveFactors.length > 0 ? <strong className="text-blue-900">{positiveFactors.slice(0, 2).join(" and ")}</strong> : "core engagement metrics"} perform significantly above typical course benchmarks, acting as the primary catalysts pushing you into this top bracket.
+                        {negativeFactors.length > 0 && (
+                          <span> However, our model recommends keeping a close eye on your <strong>{negativeFactors[0]}</strong> to prevent any unexpected drops in performance.</span>
+                        )}
+                      </>
+                    ) : isAvgGrade ? (
+                      <>
+                        <strong className="text-yellow-700">Moderate performance profile.</strong> You are projected to achieve a <strong>{formatGradeStr(result)}</strong>. 
+                        While your {positiveFactors.length > 0 ? <strong className="text-blue-900">{positiveFactors[0]}</strong> : "effort"} is successfully maintaining you at a passing standing, the algorithm noted that your {negativeFactors.length > 0 ? <strong className="text-amber-800">{negativeFactors.slice(0, 2).join(" and ")}</strong> : "consistency across assessments"} currently limits your potential to break into the B or A tier. Dedicating targeted revision here yields the highest return!
+                      </>
+                    ) : (
+                      <>
+                        <strong className="text-red-700">Actionable Academic Warning:</strong> Our diagnostic model indicates a high risk profile projected at <strong>{formatGradeStr(result)}</strong>. 
+                        {positiveFactors.length > 0 && (
+                          <span> While your <strong className="text-green-700">{positiveFactors.slice(0, 2).join(" and ")}</strong> demonstrated positive momentum, </span>
+                        )}
+                        the primary risk drivers pulling your grade downward into danger zones are your {negativeFactors.length > 0 ? <strong className="text-red-800">{negativeFactors.slice(0, 3).join(", ")}</strong> : "current overall statistics"}, which currently fall into critical underperformance percentiles. 
+                        We strongly urge booking a session with a mentor today to establish an immediate academic intervention plan!
+                      </>
+                    )}
+                  </p>
+                  <div className="pt-2 border-t border-blue-200/50 text-xs text-blue-600 font-medium">
+                    <span>⚡ Powered by LIME Explainable AI (XAI) multi-variable regression</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
       )}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes slideIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }

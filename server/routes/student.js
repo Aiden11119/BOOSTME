@@ -31,9 +31,11 @@ router.post('/predict', verifyToken, verifyRole(['student']), async (req, res) =
 
     // 2. Call Flask API
     let predictedGrade;
+    let xaiExplanations = null;
     try {
       const flaskResponse = await axios.post('http://127.0.0.1:5001/predict', flaskPayload);
       predictedGrade = flaskResponse.data.predicted_grade;
+      xaiExplanations = flaskResponse.data.xai_explanations || null;
       if (!predictedGrade) throw new Error("No grade string in response.");
     } catch (apiErr) {
       console.error("Flask API Error:", apiErr.message);
@@ -54,6 +56,7 @@ router.post('/predict', verifyToken, verifyRole(['student']), async (req, res) =
     res.json({
       prediction_id: result.insertId,
       predicted_grade: predictedGrade,
+      xai_explanations: xaiExplanations,
       message: 'Prediction successful'
     });
   } catch (err) {
