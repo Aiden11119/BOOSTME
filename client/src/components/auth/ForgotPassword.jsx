@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Mail, KeyRound, Lock, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
@@ -11,8 +11,19 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [countdown, setCountdown] = useState(0);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
@@ -22,6 +33,7 @@ const ForgotPassword = () => {
     try {
       const res = await api.post('/auth/forgot-password-otp', { email });
       toast.success(res.data.message || 'OTP sent successfully.');
+      setCountdown(60); // Start 60s countdown
       setStep(2);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send OTP.');
@@ -191,15 +203,23 @@ const ForgotPassword = () => {
             </div>
             
             <div className="text-center mt-4 text-sm text-gray-600">
-               Didn't receive code?{' '}
-               <button 
-                  type="button" 
-                  onClick={handleRequestOtp} 
-                  disabled={isLoading}
-                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors bg-transparent border-none p-0 cursor-pointer disabled:opacity-50"
-                >
-                 Resend Code
-               </button>
+               {countdown > 0 ? (
+                 <span className="text-xs text-gray-500 font-medium">
+                   Didn't receive code? Resend in <span className="font-semibold text-blue-600">{countdown}s</span>
+                 </span>
+               ) : (
+                 <>
+                   Didn't receive code?{' '}
+                   <button 
+                      type="button" 
+                      onClick={handleRequestOtp} 
+                      disabled={isLoading}
+                      className="font-medium text-blue-600 hover:text-blue-500 transition-colors bg-transparent border-none p-0 cursor-pointer disabled:opacity-50"
+                    >
+                     Resend Code
+                   </button>
+                 </>
+               )}
             </div>
           </form>
         )}

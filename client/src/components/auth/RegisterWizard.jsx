@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { User, BookOpen, GraduationCap, ArrowRight, ArrowLeft, CheckCircle2, Upload, X, Mail } from 'lucide-react';
@@ -34,6 +34,17 @@ const RegisterWizard = () => {
   const [otpCode, setOtpCode] = useState('');
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   // Lecturer Courses State
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -95,6 +106,7 @@ const RegisterWizard = () => {
     try {
       await api.post('/auth/send-otp', { email: formData.email });
       setOtpSent(true);
+      setCountdown(60); // Start 60s countdown
       toast.success('Verification code sent to your email.');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send OTP');
@@ -299,6 +311,25 @@ const RegisterWizard = () => {
                   >
                     {isVerifyingOtp ? 'Verifying...' : 'Verify Code'}
                   </button>
+                  
+                  {/* Resend OTP countdown/button */}
+                  <div className="text-center mt-5">
+                    {countdown > 0 ? (
+                      <p className="text-xs text-gray-500 font-medium">
+                        Didn't receive the code? Resend in <span className="font-semibold text-blue-600">{countdown}s</span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={isSendingOtp}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                      >
+                        Didn't receive the code? Resend Code
+                      </button>
+                    )}
+                  </div>
+
                   <button onClick={() => setOtpSent(false)} className="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-700">
                     Change Email
                   </button>
