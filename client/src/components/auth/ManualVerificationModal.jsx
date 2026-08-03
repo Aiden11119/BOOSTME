@@ -21,7 +21,7 @@ const ManualVerificationModal = ({ initialEmail = '', onClose }) => {
     e.preventDefault();
     const { full_name, email, role, id_number, message } = formData;
 
-    if (!full_name.trim() || !email.trim() || !id_number.trim()) {
+    if (!full_name.trim() || !email.trim() || !id_number.trim() || !message.trim()) {
       return toast.error('Please fill in all required fields.');
     }
 
@@ -45,13 +45,13 @@ const ManualVerificationModal = ({ initialEmail = '', onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in-up">
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100 dark:border-slate-700 relative overflow-hidden transition-all duration-300">
-        
+
         {/* Glow Effects */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full filter blur-2xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full filter blur-2xl pointer-events-none"></div>
 
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700"
           title="Close modal"
         >
@@ -83,7 +83,7 @@ const ManualVerificationModal = ({ initialEmail = '', onClose }) => {
                   value={formData.full_name}
                   onChange={handleChange}
                   className="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium transition-all"
-                  placeholder="Aiden Tan"
+                  placeholder="TING SING SOON"
                 />
               </div>
             </div>
@@ -142,18 +142,19 @@ const ManualVerificationModal = ({ initialEmail = '', onClose }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Verification Message / Message (Optional)</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Verification Message / Reason *</label>
             <div className="relative">
               <div className="absolute top-3 left-3.5 flex items-start pointer-events-none">
                 <FileText className="h-4.5 w-4.5 text-gray-400" />
               </div>
               <textarea
                 name="message"
+                required
                 value={formData.message}
                 onChange={handleChange}
                 rows="3"
                 className="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm font-medium transition-all resize-none"
-                placeholder="I am not receiving the registration OTP code in my UTAR inbox. Please verify me."
+                placeholder="Please describe why you are requesting manual verification (e.g., OTP email never arrived)."
               ></textarea>
             </div>
           </div>

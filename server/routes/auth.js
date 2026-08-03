@@ -573,8 +573,8 @@ router.put('/change-password', verifyToken, async (req, res) => {
 router.post('/submit-registration-request', async (req, res) => {
   const { full_name, email, role, id_number, message } = req.body;
 
-  if (!full_name || !email || !role || !id_number) {
-    return res.status(400).json({ message: 'Name, Email, Role, and ID Number are required.' });
+  if (!full_name || !email || !role || !id_number || !message) {
+    return res.status(400).json({ message: 'Name, Email, Role, ID Number, and Reason/Message are required.' });
   }
 
   const allowedRoles = ['student', 'lecturer', 'mentor'];
