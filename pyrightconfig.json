@@ -1,0 +1,13 @@
+{
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportGeneralTypeIssues": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalSubscript": false,
+  "reportPrivateImportUsage": false,
+  "reportUnusedImport": "warning",
+  "pythonVersion": "3.11",
+  "venvPath": ".",
+  "venv": ".venv"
+}
