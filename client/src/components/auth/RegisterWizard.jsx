@@ -340,10 +340,6 @@ const RegisterWizard = () => {
                   >
                     Still haven't received it? Submit a manual verification request
                   </button>
-
-                  <button onClick={() => setOtpSent(false)} className="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-700">
-                    Change Email
-                  </button>
                 </div>
               )}
             </div>
