@@ -626,4 +626,69 @@ router.post('/submit-registration-request', async (req, res) => {
   }
 });
 
+// Submit manual password reset verification request
+router.post('/submit-reset-request', async (req, res) => {
+  const { email, id_number, message } = req.body;
+
+  if (!email || !id_number || !message) {
+    return res.status(400).json({ message: 'Email, ID Number, and Reason/Message are required.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email) || !email.toLowerCase().endsWith('utar.my')) {
+    return res.status(400).json({ message: 'A valid UTAR email address (ending with utar.my) is required.' });
+  }
+
+  try {
+    // 1. Verify user exists
+    const [existingUsers] = await pool.query(
+      'SELECT full_name, role, student_id_number FROM users WHERE email = ?',
+      [email.trim().toLowerCase()]
+    );
+
+    if (existingUsers.length === 0) {
+      return res.status(400).json({ message: 'No account exists with this email address. Please register first.' });
+    }
+
+    const user = existingUsers[0];
+
+    // 2. Validate Student ID matches if role is student
+    if (user.role === 'student' && user.student_id_number) {
+      if (user.student_id_number.trim().toLowerCase() !== id_number.trim().toLowerCase()) {
+        return res.status(400).json({ message: 'The student ID number does not match our records.' });
+      }
+    }
+
+    // 3. Check for existing pending reset request
+    const [existingRequests] = await pool.query(
+      'SELECT id FROM registration_requests WHERE email = ? AND request_type = "reset_password" AND status = "pending"',
+      [email.trim().toLowerCase()]
+    );
+
+    if (existingRequests.length > 0) {
+      const existing = existingRequests[0];
+      // Update existing pending reset request
+      await pool.query(
+        `UPDATE registration_requests 
+         SET full_name = ?, id_number = ?, message = ?, created_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [user.full_name, id_number.trim(), message.trim(), existing.id]
+      );
+      return res.json({ message: 'Your existing password reset request has been updated with the latest details.' });
+    }
+
+    // 4. Insert new reset request
+    await pool.query(
+      `INSERT INTO registration_requests (full_name, email, role, id_number, message, request_type, status)
+       VALUES (?, ?, ?, ?, ?, 'reset_password', 'pending')`,
+      [user.full_name, email.trim().toLowerCase(), user.role, id_number.trim(), message.trim()]
+    );
+
+    return res.status(201).json({ message: 'Password reset request submitted successfully. An Admin will review it shortly.' });
+  } catch (err) {
+    console.error('Submit Reset Request Error:', err);
+    return res.status(500).json({ message: 'Server error submitting password reset request.' });
+  }
+});
+
 module.exports = router;

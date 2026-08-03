@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Mail, KeyRound, Lock, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import api from '../../services/api';
+import ManualVerificationModal from './ManualVerificationModal';
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -12,6 +13,7 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [showManualModal, setShowManualModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -221,9 +223,25 @@ const ForgotPassword = () => {
                  </>
                )}
             </div>
+            
+            {/* Manual Reset Fallback */}
+            <button
+               type="button"
+               onClick={() => setShowManualModal(true)}
+               className="text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors block mx-auto mt-2 underline cursor-pointer"
+             >
+               Still haven't received it? Submit a manual reset request
+             </button>
           </form>
         )}
       </div>
+      {showManualModal && (
+        <ManualVerificationModal 
+          initialEmail={email} 
+          mode="reset_password" 
+          onClose={() => setShowManualModal(false)} 
+        />
+      )}
     </div>
   );
 };

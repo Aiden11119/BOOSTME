@@ -106,7 +106,7 @@ router.put('/settings/maintenance', verifyToken, verifyRole(['admin']), async (r
 router.get('/registration-requests', verifyToken, verifyRole(['admin']), async (req, res) => {
   try {
     const [requests] = await pool.query(
-      'SELECT id, full_name, email, role, id_number, message, created_at FROM registration_requests WHERE status = "pending" ORDER BY created_at DESC'
+      'SELECT id, full_name, email, role, id_number, message, request_type, created_at FROM registration_requests WHERE status = "pending" ORDER BY created_at DESC'
     );
     res.json(requests);
   } catch (error) {
@@ -131,66 +131,118 @@ router.post('/registration-requests/:id/approve', verifyToken, verifyRole(['admi
       return res.status(400).json({ message: `Request is already ${request.status}.` });
     }
 
-    // 2. Check if user already exists
-    const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [request.email]);
-    if (existingUsers.length > 0) {
-      await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
-      return res.status(400).json({ message: 'User already exists. Auto-rejecting this request.' });
+    // 2. Check request type
+    if (request.request_type === 'register') {
+      // Check if user already exists
+      const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [request.email]);
+      if (existingUsers.length > 0) {
+        await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
+        return res.status(400).json({ message: 'User already exists. Auto-rejecting this request.' });
+      }
+
+      // Create password hash for "123456"
+      const salt = await bcrypt.genSalt(10);
+      const password_hash = await bcrypt.hash('123456', salt);
+
+      // Insert user into users table
+      await pool.query(
+        `INSERT INTO users (role, email, password_hash, full_name, student_id_number, is_active)
+         VALUES (?, ?, ?, ?, ?, true)`,
+        [
+          request.role,
+          request.email,
+          password_hash,
+          request.full_name,
+          request.role === 'student' ? request.id_number : null
+        ]
+      );
+
+      // Update request status to approved
+      await pool.query('UPDATE registration_requests SET status = "approved" WHERE id = ?', [requestId]);
+
+      // Send welcome email to user
+      const subject = 'Your BoostMe Registration Request is Approved!';
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
+          <h2 style="color: #2563eb;">Welcome to BoostMe!</h2>
+          <p>Hello ${request.full_name},</p>
+          <p>We are pleased to inform you that your manual registration request has been <strong>approved</strong> by the administrator.</p>
+          <p>You can now log in to the platform with the credentials below:</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Login URL:</strong> <a href="http://localhost:5173/login">http://localhost:5173/login</a></p>
+            <p style="margin: 5px 0 0 0;"><strong>Username / Email:</strong> ${request.email}</p>
+            <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">123456</code></p>
+          </div>
+          <p style="color: #ef4444; font-weight: bold;">⚠️ IMPORTANT SECURITY NOTICE:</p>
+          <p>For your account security, please complete the following steps immediately after logging in:</p>
+          <ol>
+            <li>Go to your <strong>Profile Tab</strong>.</li>
+            <li>Change your password to a strong, secure one.</li>
+            <li>Review and update your personal details (like your department, semester, or course list) to ensure all data is accurate.</li>
+          </ol>
+          <p>Thank you for joining BoostMe!</p>
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af;">This is an automated system email. Please do not reply directly to this message.</p>
+        </div>
+      `;
+      
+      sendEmail(request.email, subject, html).catch(err => {
+        console.error('Failed to send approval email:', err);
+      });
+
+      return res.json({ message: 'Registration request approved successfully. User account created.' });
+
+    } else if (request.request_type === 'reset_password') {
+      // Verify user exists
+      const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [request.email]);
+      if (existingUsers.length === 0) {
+        await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
+        return res.status(400).json({ message: 'User account not found. Auto-rejecting this request.' });
+      }
+
+      // Create password hash for "123456"
+      const salt = await bcrypt.genSalt(10);
+      const password_hash = await bcrypt.hash('123456', salt);
+
+      // Update password hash in users table
+      await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [password_hash, request.email]);
+
+      // Update request status to approved
+      await pool.query('UPDATE registration_requests SET status = "approved" WHERE id = ?', [requestId]);
+
+      // Send password reset notification email
+      const subject = 'Your BoostMe Password Has Been Reset';
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
+          <h2 style="color: #ea580c;">BoostMe Password Reset Complete</h2>
+          <p>Hello ${request.full_name},</p>
+          <p>We are writing to inform you that your manual password reset request has been <strong>approved</strong> by the administrator.</p>
+          <p>Your password has been successfully reset to the temporary credential below:</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Login URL:</strong> <a href="http://localhost:5173/login">http://localhost:5173/login</a></p>
+            <p style="margin: 5px 0 0 0;"><strong>Username / Email:</strong> ${request.email}</p>
+            <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">123456</code></p>
+          </div>
+          <p style="color: #ef4444; font-weight: bold;">⚠️ IMPORTANT SECURITY NOTICE:</p>
+          <p>For your account security, please complete the following steps immediately after logging in:</p>
+          <ol>
+            <li>Go to your <strong>Profile Tab</strong>.</li>
+            <li>Change your password to a strong, secure one.</li>
+          </ol>
+          <p>Thank you,</p>
+          <p>The BoostMe Support Team</p>
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af;">This is an automated system email. Please do not reply directly to this message.</p>
+        </div>
+      `;
+
+      sendEmail(request.email, subject, html).catch(err => {
+        console.error('Failed to send password reset approval email:', err);
+      });
+
+      return res.json({ message: 'Password reset request approved successfully. Password updated to 123456.' });
     }
 
-    // 3. Create password hash for "123456"
-    const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash('123456', salt);
-
-    // 4. Insert user into users table
-    await pool.query(
-      `INSERT INTO users (role, email, password_hash, full_name, student_id_number, is_active)
-       VALUES (?, ?, ?, ?, ?, true)`,
-      [
-        request.role,
-        request.email,
-        password_hash,
-        request.full_name,
-        request.role === 'student' ? request.id_number : null
-      ]
-    );
-
-    // 5. Update request status to approved
-    await pool.query('UPDATE registration_requests SET status = "approved" WHERE id = ?', [requestId]);
-
-    // 6. Send welcome email to user
-    const subject = 'Your BoostMe Registration Request is Approved!';
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
-        <h2 style="color: #2563eb;">Welcome to BoostMe!</h2>
-        <p>Hello ${request.full_name},</p>
-        <p>We are pleased to inform you that your manual registration request has been <strong>approved</strong> by the administrator.</p>
-        <p>You can now log in to the platform with the credentials below:</p>
-        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Login URL:</strong> <a href="http://localhost:5173/login">http://localhost:5173/login</a></p>
-          <p style="margin: 5px 0 0 0;"><strong>Username / Email:</strong> ${request.email}</p>
-          <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">123456</code></p>
-        </div>
-        <p style="color: #ef4444; font-weight: bold;">⚠️ IMPORTANT SECURITY NOTICE:</p>
-        <p>For your account security, please complete the following steps immediately after logging in:</p>
-        <ol>
-          <li>Go to your <strong>Profile Tab</strong>.</li>
-          <li>Change your password to a strong, secure one.</li>
-          <li>Review and update your personal details (like your department, semester, or course list) to ensure all data is accurate.</li>
-        </ol>
-        <p>Thank you for joining BoostMe!</p>
-        <p style="margin-top: 30px; font-size: 12px; color: #9ca3af;">This is an automated system email. Please do not reply directly to this message.</p>
-      </div>
-    `;
-    
-    // Fire-and-forget email sending
-    sendEmail(request.email, subject, html).catch(err => {
-      console.error('Failed to send approval email:', err);
-    });
-
-    res.json({ message: 'Registration request approved successfully. User account created.' });
   } catch (error) {
-    console.error('Error approving registration request:', error);
+    console.error('Error approving request:', error);
     res.status(500).json({ message: 'Server error approving request.' });
   }
 });
@@ -214,8 +266,18 @@ router.post('/registration-requests/:id/reject', verifyToken, verifyRole(['admin
     await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
 
     // Send rejection email to user
-    const subject = 'Regarding Your BoostMe Registration Request';
-    const html = `
+    const isReset = request.request_type === 'reset_password';
+    const subject = isReset ? 'Regarding Your BoostMe Password Reset Request' : 'Regarding Your BoostMe Registration Request';
+    const html = isReset ? `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
+        <h2 style="color: #dc2626;">BoostMe Password Reset Request Update</h2>
+        <p>Hello ${request.full_name},</p>
+        <p>We are writing to inform you that your manual password reset request has been reviewed by the administrator and unfortunately could <strong>not</strong> be approved at this time.</p>
+        <p>Please double-check that your email and student/staff ID are correct. If you continue to have trouble logging in, please contact system support or your lecturer.</p>
+        <p>Thank you for your patience.</p>
+        <p style="margin-top: 30px; font-size: 12px; color: #9ca3af;">This is an automated system email. Please do not reply directly to this message.</p>
+      </div>
+    ` : `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
         <h2 style="color: #dc2626;">BoostMe Registration Request Update</h2>
         <p>Hello ${request.full_name},</p>
@@ -230,7 +292,7 @@ router.post('/registration-requests/:id/reject', verifyToken, verifyRole(['admin
       console.error('Failed to send rejection email:', err);
     });
 
-    res.json({ message: 'Registration request rejected successfully.' });
+    res.json({ message: 'Request rejected successfully.' });
   } catch (error) {
     console.error('Error rejecting registration request:', error);
     res.status(500).json({ message: 'Server error rejecting request.' });
