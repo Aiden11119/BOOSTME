@@ -146,7 +146,7 @@ const AIChatTab = () => {
       {/* Header */}
       <div className="bg-indigo-600 text-white p-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Bot className="w-6 h-6" />
+          <img src="/study-mascot.png" alt="Mascot" className="w-8 h-8 rounded-full border border-white/20 bg-white" />
           <div>
             <h2 className="text-xl font-bold">AI Assistant</h2>
             <p className="text-indigo-200 text-xs mt-0.5">Your 24/7 personalized counselor</p>
@@ -159,9 +159,13 @@ const AIChatTab = () => {
         {messages.filter(msg => !(msg.role === 'ai' && msg.text === '')).map((msg, idx) => (
           <div key={msg.id || idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-green-100 text-green-600'}`}>
-                {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-              </div>
+              {msg.role === 'user' ? (
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
+                  <User className="w-4 h-4" />
+                </div>
+              ) : (
+                <img src="/study-mascot.png" alt="Mascot" className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-100 bg-white object-cover" />
+              )}
               <div className={`p-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'}`} style={{ whiteSpace: 'pre-wrap' }}>
                 {msg.text}
               </div>
@@ -172,9 +176,7 @@ const AIChatTab = () => {
         {isLoading && (
           <div className="flex justify-start">
             <div className="flex gap-2 max-w-[85%] flex-row">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                <Bot className="w-4 h-4" />
-              </div>
+              <img src="/study-mascot.png" alt="Mascot" className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-100 bg-white object-cover" />
               <div className="p-3 bg-white text-gray-800 shadow-sm border border-gray-100 rounded-2xl rounded-tl-none flex items-center gap-2 text-[14px]">
                 <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                 <span className="text-gray-500">Thinking...</span>

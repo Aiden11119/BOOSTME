@@ -613,6 +613,18 @@ const RegisterWizard = () => {
           onClose={() => setShowManualModal(false)} 
         />
       )}
+
+      {/* Peeking Mascot with speech bubble */}
+      <div className="absolute bottom-0 right-2 lg:bottom-6 lg:right-16 z-20 flex items-end gap-3">
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-white/40 max-w-[220px] mb-8 relative after:content-[''] after:absolute after:bottom-0 after:right-6 after:w-0 after:h-0 after:border-t-[8px] after:border-t-white/80 after:border-x-[6px] after:border-x-transparent after:translate-y-full">
+          💡 Registering is easy! Failing is easier, so sign up now! 🐾
+        </div>
+        <img 
+          src="/study-mascot.png" 
+          alt="Mascot peak" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
+        />
+      </div>
     </div>
   );
 };

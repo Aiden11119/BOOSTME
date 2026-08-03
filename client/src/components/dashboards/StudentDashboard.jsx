@@ -83,6 +83,29 @@ const PredictTab = () => {
   const [isFetchingMarks, setIsFetchingMarks] = useState(false);
   const [marksNotUploaded, setMarksNotUploaded] = useState(false);
   const [isStressModalOpen, setIsStressModalOpen] = useState(false);
+
+  const [funnyLoadingMessage, setFunnyLoadingMessage] = useState('');
+  
+  const funnyLoadingPhrases = [
+    "Consulting the academic crystal ball... 🔮",
+    "Begging the AI not to predict a D... 🥺",
+    "Brewing study motivation espresso... ☕",
+    "Translating study hours into exam performance... 📈",
+    "Analyzing your caffeine intake vs midterm score... ⚡",
+    "Praying to the bell curve gods... 🔔",
+    "Recalculating stress levels to maximum capacity... 🤯"
+  ];
+
+  useEffect(() => {
+    let interval;
+    if (isLoading) {
+      setFunnyLoadingMessage(funnyLoadingPhrases[Math.floor(Math.random() * funnyLoadingPhrases.length)]);
+      interval = setInterval(() => {
+        setFunnyLoadingMessage(funnyLoadingPhrases[Math.floor(Math.random() * funnyLoadingPhrases.length)]);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
   
   const filteredCourses = COURSES.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()));
 
@@ -280,6 +303,36 @@ const PredictTab = () => {
         }} 
       />
 
+      {/* Humorous loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-white animate-fade-in-up">
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl flex flex-col items-center relative overflow-hidden border border-gray-100 dark:border-slate-700">
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full filter blur-2xl pointer-events-none"></div>
+            <div className="relative mb-6">
+              <img src="/study-mascot.png" alt="Mascot loading" className="w-24 h-24 rounded-full border-4 border-blue-500/20 bg-gray-50 animate-bounce object-cover" />
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin"></div>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Predicting Grade...</h3>
+            <div className="h-12 flex items-center justify-center">
+              <p className="text-sm text-blue-600 font-semibold italic animate-pulse">
+                {funnyLoadingMessage}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Humorous empty state placeholder */}
+      {!result && (
+        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col items-center text-center justify-center min-h-[300px] animate-fade-in-up">
+          <img src="/study-mascot.png" alt="Study Mascot" className="w-28 h-28 rounded-full border border-gray-100 bg-gray-50 shadow-inner object-cover mb-4" />
+          <h3 className="text-lg font-bold text-gray-900">No Prediction Forecasted</h3>
+          <p className="text-gray-500 text-sm mt-1 max-w-sm font-medium">
+            Fill in the parameters above to forecast your course grade. Staring at this screen counts as studying, right? 😜
+          </p>
+        </div>
+      )}
+
       {result && (
         <div className={`p-8 rounded-3xl border-2 shadow-lg banner-animation ${result === 'A' || result === 'B' ? 'bg-green-50 border-green-200 text-green-900' : result === 'C' ? 'bg-yellow-50 border-yellow-200 text-yellow-900' : 'bg-red-50 border-red-300 text-red-900 bg-red-stripes'}`}>
           <div className="flex items-center gap-4">
@@ -311,13 +364,8 @@ const PredictTab = () => {
           <div className="space-y-5">
             {xaiExplanations.map((item, idx) => {
               const isPositive = item.impact > 0;
-              // LIME impacts can be small floats (e.g. 0.05). Let's scale them nicely. 
-              // We'll normalize by the max impact to make the bars look good.
               const maxImpact = Math.max(...xaiExplanations.map(x => Math.abs(x.impact)));
               const normalizedImpact = maxImpact > 0 ? (Math.abs(item.impact) / maxImpact) * 100 : 0;
-              
-              // Feature name cleaner (remove LIME condition strings if present, though we might want them)
-              // We'll just display it as is.
               
               return (
                 <div key={idx} className="flex flex-col gap-1.5">
@@ -435,7 +483,15 @@ const HistoryTab = () => {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {history.length === 0 ? (
-              <tr><td colSpan="6" className="p-8 text-center text-gray-500">No predictions made yet.</td></tr>
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-gray-500">
+                  <div className="flex flex-col items-center py-10 justify-center">
+                    <img src="/study-mascot.png" alt="No history" className="w-20 h-20 rounded-full border border-gray-100 bg-gray-50 object-cover mb-3" />
+                    <p className="font-semibold text-gray-700">No predictions made yet.</p>
+                    <p className="text-xs text-gray-400 mt-1 font-medium">Is this a brand new semester, or are we denying the exam schedule? 🫣</p>
+                  </div>
+                </td>
+              </tr>
             ) : history.map((row) => (
               <tr key={row.prediction_id} className="hover:bg-gray-50 transition-colors">
                 <td className="p-4 text-sm whitespace-nowrap">{new Date(row.created_at).toLocaleDateString()}</td>
@@ -688,7 +744,11 @@ const MentorsTab = () => {
                   <h3 className="text-xl font-bold text-gray-900 mb-4 px-1">Upcoming Sessions</h3>
                   <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                     {upcomingBookings.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">You have no upcoming bookings.</div>
+                      <div className="p-8 text-center text-gray-500 flex flex-col items-center py-12 justify-center animate-fade-in-up">
+                        <img src="/study-mascot.png" alt="No bookings" className="w-20 h-20 rounded-full border border-gray-100 bg-gray-50 object-cover mb-3" />
+                        <p className="font-semibold text-gray-700">No upcoming mentor sessions.</p>
+                        <p className="text-xs text-gray-400 mt-1 font-medium">Living on the edge are we? Or do you have everything under control? 😎</p>
+                      </div>
                     ) : (
                       <div className="flex flex-col">
                         {upcomingBookings.map(renderBooking)}

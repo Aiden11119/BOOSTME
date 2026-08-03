@@ -35,7 +35,7 @@ const Login = () => {
       <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
       <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 w-full">
+      <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-6 sm:p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 w-full">
         <div>
           <div className="mx-auto h-20 w-20 bg-gradient-to-tr from-blue-600 to-purple-600 p-0.5 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 overflow-hidden">
             <img src="/logo-192.png" alt="BoostMe Logo" className="h-full w-full object-cover rounded-2xl -rotate-3 bg-white" />
@@ -119,6 +119,54 @@ const Login = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Cartoon Mascot 1: Sleepy Coffee Cat (Bottom-Right) */}
+      <div className="absolute bottom-0 right-2 lg:bottom-6 lg:right-16 z-20 flex items-end gap-3">
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-white/40 max-w-[220px] mb-8 relative after:content-[''] after:absolute after:bottom-0 after:right-6 after:w-0 after:h-0 after:border-t-[8px] after:border-t-white/80 after:border-x-[6px] after:border-x-transparent after:translate-y-full">
+          💡 Let's get this bread! (Or at least a passing grade) 🐾
+        </div>
+        <img 
+          src="/study-mascot.png" 
+          alt="Coffee Cat" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
+        />
+      </div>
+
+      {/* Cartoon Mascot 2: Nerdy Exam Owl (Bottom-Left) */}
+      <div className="absolute bottom-0 left-2 lg:bottom-6 lg:left-16 z-20 flex items-end gap-3">
+        <img 
+          src="/study-owl.png" 
+          alt="Nerdy Owl" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[5deg] transform hover:scale-105 transition-transform duration-300" 
+        />
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-white/40 max-w-[220px] mb-8 relative after:content-[''] after:absolute after:bottom-0 after:left-6 after:w-0 after:h-0 after:border-t-[8px] after:border-t-white/80 after:border-x-[6px] after:border-x-transparent after:translate-y-full">
+          💡 Wait, did I submit the assignment on time?! 🦉
+        </div>
+      </div>
+
+      {/* Cartoon Mascot 3: Crying Hamster (Top-Right) */}
+      <div className="absolute top-2 right-2 lg:top-16 lg:right-16 z-20 flex flex-col items-center gap-3">
+        <img 
+          src="/study-hamster.png" 
+          alt="Stressed Hamster" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain transform hover:scale-105 transition-transform duration-300" 
+        />
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl border border-white/40 max-w-[200px] text-center relative after:content-[''] after:absolute after:top-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-b-[8px] after:border-b-white/80 after:border-x-[6px] after:border-x-transparent after:-translate-y-full">
+          😭 Is 1 + 1 = 11? Just let me pass... 🐹
+        </div>
+      </div>
+
+      {/* Cartoon Mascot 4: Sleeping Koala (Top-Left) */}
+      <div className="absolute top-2 left-2 lg:top-16 lg:left-16 z-20 flex flex-col items-center gap-3">
+        <img 
+          src="/study-koala.png" 
+          alt="Sleeping Koala" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain transform hover:scale-105 transition-transform duration-300" 
+        />
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl border border-white/40 max-w-[200px] text-center relative after:content-[''] after:absolute after:top-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-b-[8px] after:border-b-white/80 after:border-x-[6px] after:border-x-transparent after:-translate-y-full">
+          😴 Just 5 more minutes... Is it graduation yet? 🐨🎓
+        </div>
       </div>
     </div>
   );
