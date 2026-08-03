@@ -225,14 +225,23 @@ const ForgotPassword = () => {
             </div>
             
             {/* Manual Reset Fallback */}
-            <button
+             <button
                type="button"
                onClick={() => setShowManualModal(true)}
                className="text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors block mx-auto mt-2 underline cursor-pointer"
              >
                Still haven't received it? Submit a manual reset request
              </button>
-          </form>
+
+             {/* Back button to return to Step 1 */}
+             <button
+               type="button"
+               onClick={() => setStep(1)}
+               className="w-full mt-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+             >
+               <ArrowLeft className="w-4 h-4" /> Back to Email Input
+             </button>
+           </form>
         )}
       </div>
       {showManualModal && (
