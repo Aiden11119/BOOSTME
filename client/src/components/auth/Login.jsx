@@ -37,8 +37,8 @@ const Login = () => {
 
       <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 w-full">
         <div>
-          <div className="mx-auto h-16 w-16 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
-            <User className="h-8 w-8 text-white -rotate-3" />
+          <div className="mx-auto h-20 w-20 bg-gradient-to-tr from-blue-600 to-purple-600 p-0.5 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 overflow-hidden">
+            <img src="/logo-192.png" alt="BoostMe Logo" className="h-full w-full object-cover rounded-2xl -rotate-3 bg-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
             Sign in to BoostMe

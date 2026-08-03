@@ -14,3 +14,168 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-color);
 }
+
+/* ─── Global Dark Theme Overrides ───────────────────────────────────────────── */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --bg-color: #0f172a; /* Slate 900 */
+}
+
+/* Ensure smooth theme transitions */
+body, header, aside, main, div, button, input, select, textarea, th, td, tr, table {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+/* Card & Sidebar backgrounds */
+.dark .bg-white,
+.dark aside.bg-white,
+.dark header.bg-white {
+  background-color: #1e293b !important; /* Slate 800 */
+  color: #f8fafc;
+}
+
+/* Main Content Page backgrounds */
+.dark .bg-gray-50,
+.dark main.bg-gray-50 {
+  background-color: #0f172a !important; /* Slate 900 */
+}
+
+/* Text coloring overrides */
+.dark .text-gray-900 { color: #f8fafc !important; }
+.dark .text-gray-800 { color: #f1f5f9 !important; }
+.dark .text-gray-700 { color: #e2e8f0 !important; }
+.dark .text-gray-600 { color: #cbd5e1 !important; }
+.dark .text-gray-500 { color: #94a3b8 !important; }
+.dark .text-gray-400 { color: #64748b !important; }
+
+/* Input fields, Dropdowns, and Textareas */
+.dark input, 
+.dark select, 
+.dark textarea {
+  background-color: #0f172a !important; /* Slate 900 inside cards */
+  color: #f8fafc !important;
+  border-color: #334155 !important; /* Slate 700 */
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #3b82f6 !important;
+}
+
+.dark input:disabled, 
+.dark select:disabled, 
+.dark textarea:disabled {
+  background-color: #1e293b !important;
+  color: #64748b !important;
+  border-color: #1e293b !important;
+}
+
+/* Dropdown list overlays */
+.dark .absolute.z-50.bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.dark .absolute.z-50.bg-white > div:hover {
+  background-color: #334155 !important;
+}
+
+/* Tables, history, etc. */
+.dark th {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark tr:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .divide-y > * {
+  border-color: #334155 !important;
+}
+
+.dark .divide-gray-100 > * {
+  border-color: #334155 !important;
+}
+
+/* Borders */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #334155 !important;
+}
+
+/* Headings */
+.dark h1, .dark h2, .dark h3, .dark h4 {
+  color: #ffffff !important;
+}
+
+/* Sub-components & widgets (Modal overlay) */
+.dark .bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Chatbot overrides */
+.dark .bg-gray-50 .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-gray-50 .bg-indigo-600 {
+  background-color: #4f46e5 !important;
+}
+
+.dark .bg-gray-50 .text-gray-800 {
+  color: #f1f5f9 !important;
+}
+
+/* Translucent overlay cards (Login / Register wizards) */
+.dark .bg-white\/80,
+.dark .bg-white\/90 {
+  background-color: rgba(30, 41, 59, 0.85) !important; /* Slate 800 with transparency */
+  border-color: rgba(51, 65, 85, 0.3) !important;
+}
+
+/* At-risk student row highlighters in dark mode (prevent white-on-light-peach contrast issue) */
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.12) !important; /* Soft transparent red-500 */
+}
+
+.dark .hover\:bg-red-100:hover,
+.dark tr.bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.2) !important; /* Darker red-500 on hover */
+}
+
+.dark tr.bg-red-50 {
+  border-color: #ef4444 !important; /* Solid red border on the left */
+}
+
+/* Keep text readable on dark red background */
+.dark tr.bg-red-50 p,
+.dark tr.bg-red-50 td,
+.dark tr.bg-red-50 span {
+  color: #f8fafc !important; /* Crisp white text */
+}
+
+.dark tr.bg-red-50 p.text-gray-500,
+.dark tr.bg-red-50 p.text-xs {
+  color: #fca5a5 !important; /* Light red-300 for labels (id, email) */
+}
+
+
+

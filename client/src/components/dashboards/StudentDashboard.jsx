@@ -168,10 +168,26 @@ const PredictTab = () => {
                     setShowCourseDropdown(true);
                   }}
                   onFocus={() => setShowCourseDropdown(true)}
-                  className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                  className="w-full px-4 py-2.5 pr-16 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
                   placeholder="Type to search for a course..."
                   required={!formData.course_name}
                 />
+                 {courseSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCourseSearch('');
+                      setFormData({...formData, course_name: ''});
+                      setShowCourseDropdown(false);
+                      setResult(null);
+                      setXaiExplanations(null);
+                    }}
+                    className="absolute right-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-0.5 rounded-full hover:bg-red-50"
+                    title="Clear course"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               </div>
               

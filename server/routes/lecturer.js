@@ -15,6 +15,11 @@ router.get('/students', verifyToken, verifyRole(['lecturer']), async (req, res) 
         p.prediction_id, p.course_name, p.predicted_grade, p.created_at
       FROM users u
       JOIN prediction_history p ON u.id = p.student_id
+      JOIN (
+        SELECT student_id, course_name, MAX(prediction_id) as max_id
+        FROM prediction_history
+        GROUP BY student_id, course_name
+      ) latest ON p.prediction_id = latest.max_id
       JOIN lecturer_courses lc ON p.course_name = lc.course_name
       WHERE u.role = 'student' AND lc.lecturer_id = ?
     `;
@@ -77,7 +82,23 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'text/csv'                  // .csv
+    ];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(file.mimetype) || ['.xlsx', '.xls', '.csv'].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel (.xlsx, .xls) and CSV files are allowed.'), false);
+    }
+  }
+});
 
 // Upload marks from Excel/CSV
 router.post('/upload-marks', verifyToken, verifyRole(['lecturer']), upload.single('file'), async (req, res) => {

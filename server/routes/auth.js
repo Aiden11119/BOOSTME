@@ -24,7 +24,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 } // 2MB limit
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, GIF, WebP) are allowed.'), false);
+    }
+  }
 });
 
 // Register User
@@ -56,6 +64,28 @@ router.post('/register', upload.single('avatar'), async (req, res) => {
         coursesList = courses;
       }
     }
+  }
+
+  // Only allow UTAR email addresses (must end with utar.my)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email) || !email.toLowerCase().endsWith('utar.my')) {
+    return res.status(400).json({ message: 'A valid UTAR email address (ending with utar.my) is required.' });
+  }
+
+  // Only allow valid roles — prevent registering as admin
+  const allowedRoles = ['student', 'lecturer', 'mentor'];
+  if (!role || !allowedRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid role. Must be student, lecturer, or mentor.' });
+  }
+
+  // Validate full_name
+  if (!full_name || !full_name.trim()) {
+    return res.status(400).json({ message: 'Full name is required.' });
+  }
+
+  // Validate password length
+  if (!password || password.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
   }
 
   try {
@@ -125,6 +155,11 @@ const sendEmail = require('../utils/email');
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+  // Only allow UTAR email addresses (must end with utar.my)
+  if (!email.toLowerCase().endsWith('utar.my')) {
+    return res.status(400).json({ message: 'Only UTAR email addresses (ending with utar.my) are allowed to register.' });
+  }
   
   try {
     // Check if email already used (we do it here to prevent sending OTP if email exists)
@@ -493,6 +528,44 @@ router.post('/send-message', verifyToken, async (req, res) => {
   } catch (err) {
     console.error('Failed to send generic message', err);
     res.status(500).json({ message: 'Server error sending message' });
+  }
+});
+// Change Password (for logged-in users)
+router.put('/change-password', verifyToken, async (req, res) => {
+  const userId = req.user.userId;
+  const { current_password, new_password, confirm_new_password } = req.body;
+
+  if (!current_password || !new_password || !confirm_new_password) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  if (new_password.length < 6) {
+    return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+  }
+
+  if (new_password !== confirm_new_password) {
+    return res.status(400).json({ message: 'New passwords do not match.' });
+  }
+
+  try {
+    const [users] = await pool.query('SELECT password_hash FROM users WHERE id = ?', [userId]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const isMatch = await bcrypt.compare(current_password, users[0].password_hash);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHash = await bcrypt.hash(new_password, salt);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, userId]);
+
+    return res.json({ message: 'Password changed successfully.' });
+  } catch (err) {
+    console.error('Change Password Error:', err);
+    return res.status(500).json({ message: 'Server error changing password.' });
   }
 });
 

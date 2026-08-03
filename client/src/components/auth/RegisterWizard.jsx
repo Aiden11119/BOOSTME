@@ -86,6 +86,11 @@ const RegisterWizard = () => {
       return toast.error("Please enter a valid email address");
     }
 
+    // Only allow UTAR email addresses (must end with utar.my)
+    if (!formData.email.toLowerCase().endsWith('utar.my')) {
+      return toast.error("Only UTAR email addresses (ending with utar.my) are allowed to register.");
+    }
+
     setIsSendingOtp(true);
     try {
       await api.post('/auth/send-otp', { email: formData.email });
@@ -265,7 +270,7 @@ const RegisterWizard = () => {
                       value={formData.email}
                       onChange={handleChange}
                       className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all text-sm"
-                      placeholder="you@gmail.com"
+                      placeholder="you@utar.my"
                     />
                   </div>
                   <button

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo, Camera } from 'lucide-react';
+import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo, Camera, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Sun, Moon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { COURSES } from '../../constants/courses';
@@ -47,6 +47,56 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
   const { updateUser } = useAuth();
   const fileInputRef = useRef(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Theme State
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  // Initialize theme from localStorage and apply global class
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  // Change Password State
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({ current_password: '', new_password: '', confirm_new_password: '' });
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  const handleChangePassword = async () => {
+    const { current_password, new_password, confirm_new_password } = passwordData;
+    if (!current_password || !new_password || !confirm_new_password) {
+      return toast.error('All password fields are required.');
+    }
+    if (new_password.length < 6) {
+      return toast.error('New password must be at least 6 characters.');
+    }
+    if (new_password !== confirm_new_password) {
+      return toast.error('New passwords do not match.');
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await api.put('/users/change-password', passwordData);
+      toast.success('Password changed successfully!');
+      setPasswordData({ current_password: '', new_password: '', confirm_new_password: '' });
+      setShowChangePassword(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to change password.');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -423,6 +473,132 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
 
         {/* Field grid */}
         {isEditing ? <EditContent /> : <ViewContent />}
+      </div>
+
+      {/* Change Password Section */}
+      <div className={`bg-white rounded-3xl shadow-sm border ${accent.border} overflow-hidden`}>
+        <button
+          onClick={() => setShowChangePassword(!showChangePassword)}
+          className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${accent.badge}`}>
+              <Lock className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-gray-900">Change Password</h3>
+              <p className="text-sm text-gray-500">Update your account password</p>
+            </div>
+          </div>
+          {showChangePassword ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+        </button>
+
+        {showChangePassword && (
+          <div className="px-6 pb-6 pt-2 border-t border-gray-100 animate-fade-in-up">
+            <div className="max-w-md space-y-4">
+              {/* Current Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Current Password</label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPw ? 'text' : 'password'}
+                    value={passwordData.current_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                    className={inputCls + ' pr-10'}
+                    placeholder="Enter current password"
+                  />
+                  <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">New Password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPw ? 'text' : 'password'}
+                    value={passwordData.new_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                    className={inputCls + ' pr-10'}
+                    placeholder="Enter new password (min 6 chars)"
+                  />
+                  <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {passwordData.new_password && passwordData.new_password.length < 6 && (
+                  <p className="text-red-500 text-xs mt-1 font-medium">Password must be at least 6 characters</p>
+                )}
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Confirm New Password</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPw ? 'text' : 'password'}
+                    value={passwordData.confirm_new_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirm_new_password: e.target.value })}
+                    className={inputCls + ' pr-10'}
+                    placeholder="Re-enter new password"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {passwordData.confirm_new_password && passwordData.new_password !== passwordData.confirm_new_password && (
+                  <p className="text-red-500 text-xs mt-1 font-medium">Passwords do not match</p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={isChangingPassword || !passwordData.current_password || !passwordData.new_password || !passwordData.confirm_new_password || passwordData.new_password.length < 6 || passwordData.new_password !== passwordData.confirm_new_password}
+                  className={`flex items-center gap-2 px-6 py-2.5 ${accent.btn} text-white rounded-xl font-semibold shadow-sm transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+                >
+                  <Lock className="w-4 h-4" />
+                  {isChangingPassword ? 'Changing...' : 'Update Password'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowChangePassword(false);
+                    setPasswordData({ current_password: '', new_password: '', confirm_new_password: '' });
+                  }}
+                  className="px-5 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Theme Settings Section */}
+      <div className={`bg-white rounded-3xl shadow-sm border ${accent.border} overflow-hidden`}>
+        <div className="p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${accent.badge}`}>
+              {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-gray-900">Theme Mode</h3>
+              <p className="text-sm text-gray-500">Switch between light and dark mode</p>
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none cursor-pointer ${theme === 'dark' ? accentColor === 'blue' ? 'bg-blue-600' : accentColor === 'green' ? 'bg-green-600' : 'bg-purple-600' : 'bg-gray-200'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
       </div>
 
       {/* Member since footer */}
