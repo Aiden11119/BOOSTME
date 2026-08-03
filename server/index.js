@@ -54,10 +54,10 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// OTP: max 5 requests per IP per hour
+// OTP: max 30 requests per IP per 15 minutes (relaxed for testing/demo headroom)
 const otpLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 1000,
+  max: 30,
   message: { message: 'Too many OTP requests. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
