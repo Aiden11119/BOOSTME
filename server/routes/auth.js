@@ -601,11 +601,18 @@ router.post('/submit-registration-request', async (req, res) => {
     );
 
     if (existingRequests.length > 0) {
-      const status = existingRequests[0].status;
-      if (status === 'pending') {
-        return res.status(400).json({ message: 'A verification request is already pending for this email.' });
-      } else if (status === 'approved') {
+      const existing = existingRequests[0];
+      if (existing.status === 'approved') {
         return res.status(400).json({ message: 'This email has already been approved. Please use the login page.' });
+      } else if (existing.status === 'pending') {
+        // Update the existing pending request with the latest details and update the submission timestamp
+        await pool.query(
+          `UPDATE registration_requests 
+           SET full_name = ?, role = ?, id_number = ?, message = ?, created_at = CURRENT_TIMESTAMP
+           WHERE id = ?`,
+          [full_name.trim(), role, id_number.trim(), message.trim(), existing.id]
+        );
+        return res.json({ message: 'Your existing verification request has been updated with the latest details.' });
       }
     }
 
@@ -613,7 +620,7 @@ router.post('/submit-registration-request', async (req, res) => {
     await pool.query(
       `INSERT INTO registration_requests (full_name, email, role, id_number, message, status)
        VALUES (?, ?, ?, ?, ?, 'pending')`,
-      [full_name.trim(), email.trim().toLowerCase(), role, id_number.trim(), message ? message.trim() : null]
+      [full_name.trim(), email.trim().toLowerCase(), role, id_number.trim(), message.trim()]
     );
 
     return res.status(201).json({ message: 'Verification request submitted successfully. An Admin will review it shortly.' });

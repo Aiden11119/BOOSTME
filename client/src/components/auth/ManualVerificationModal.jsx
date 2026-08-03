@@ -160,7 +160,7 @@ const ManualVerificationModal = ({ initialEmail = '', onClose }) => {
           </div>
 
           <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900/30 p-4 rounded-2xl flex items-start gap-2.5 text-xs text-yellow-800 dark:text-yellow-300 font-semibold leading-relaxed">
-            📢 <strong>Notice:</strong> Once approved, you will receive an confirmation email with your login details. Your initial temporary password will be set to <code>123456</code>.
+            📢 <strong>Notice:</strong> Once approved, you will receive an confirmation email with your login details.
           </div>
 
           <div className="flex gap-3 justify-end pt-2">
