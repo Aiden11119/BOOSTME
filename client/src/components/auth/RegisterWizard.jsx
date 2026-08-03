@@ -5,6 +5,7 @@ import { User, BookOpen, GraduationCap, ArrowRight, ArrowLeft, CheckCircle2, Upl
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { COURSES } from '../../constants/courses';
+import ManualVerificationModal from './ManualVerificationModal';
 
 const DEFAULT_AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
@@ -35,6 +36,7 @@ const RegisterWizard = () => {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [showManualModal, setShowManualModal] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -330,6 +332,15 @@ const RegisterWizard = () => {
                     )}
                   </div>
 
+                  {/* Manual verification fallback */}
+                  <button
+                    type="button"
+                    onClick={() => setShowManualModal(true)}
+                    className="text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors block mx-auto mt-4 underline cursor-pointer"
+                  >
+                    Still haven't received it? Submit a manual verification request
+                  </button>
+
                   <button onClick={() => setOtpSent(false)} className="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-700">
                     Change Email
                   </button>
@@ -600,6 +611,12 @@ const RegisterWizard = () => {
           to { opacity: 1; transform: translateY(0); }
         }
       `}} />
+      {showManualModal && (
+        <ManualVerificationModal 
+          initialEmail={formData.email} 
+          onClose={() => setShowManualModal(false)} 
+        />
+      )}
     </div>
   );
 };

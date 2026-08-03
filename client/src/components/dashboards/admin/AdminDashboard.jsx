@@ -3,6 +3,7 @@ import { useAuth } from '../../../context/AuthContext';
 import api from '../../../services/api';
 import UserManagement from './UserManagement';
 import AnnouncementManagement from './AnnouncementManagement';
+import VerificationRequests from './VerificationRequests';
 import toast from 'react-hot-toast';
 
 function AdminDashboard() {
@@ -77,6 +78,12 @@ function AdminDashboard() {
           >
             📢 Announcements
           </button>
+          <button
+            onClick={() => setActiveTab('requests')}
+            className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${activeTab === 'requests' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700'}`}
+          >
+            📝 Verification Requests
+          </button>
         </nav>
         
         <div className="p-4 mt-auto border-t border-slate-700">
@@ -118,6 +125,7 @@ function AdminDashboard() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 min-h-[500px]">
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'announcements' && <AnnouncementManagement />}
+          {activeTab === 'requests' && <VerificationRequests />}
         </div>
 
       </main>

@@ -569,4 +569,58 @@ router.put('/change-password', verifyToken, async (req, res) => {
   }
 });
 
+// Submit manual registration verification request
+router.post('/submit-registration-request', async (req, res) => {
+  const { full_name, email, role, id_number, message } = req.body;
+
+  if (!full_name || !email || !role || !id_number) {
+    return res.status(400).json({ message: 'Name, Email, Role, and ID Number are required.' });
+  }
+
+  const allowedRoles = ['student', 'lecturer', 'mentor'];
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid role. Must be student, lecturer, or mentor.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email) || !email.toLowerCase().endsWith('utar.my')) {
+    return res.status(400).json({ message: 'A valid UTAR email address (ending with utar.my) is required.' });
+  }
+
+  try {
+    // Check if user already exists
+    const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: 'User already exists with this email address.' });
+    }
+
+    // Check if a pending or approved request exists
+    const [existingRequests] = await pool.query(
+      'SELECT id, status FROM registration_requests WHERE email = ? AND status IN ("pending", "approved")',
+      [email]
+    );
+
+    if (existingRequests.length > 0) {
+      const status = existingRequests[0].status;
+      if (status === 'pending') {
+        return res.status(400).json({ message: 'A verification request is already pending for this email.' });
+      } else if (status === 'approved') {
+        return res.status(400).json({ message: 'This email has already been approved. Please use the login page.' });
+      }
+    }
+
+    // Insert new request
+    await pool.query(
+      `INSERT INTO registration_requests (full_name, email, role, id_number, message, status)
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
+      [full_name.trim(), email.trim().toLowerCase(), role, id_number.trim(), message ? message.trim() : null]
+    );
+
+    return res.status(201).json({ message: 'Verification request submitted successfully. An Admin will review it shortly.' });
+  } catch (err) {
+    console.error('Submit Registration Request Error:', err);
+    return res.status(500).json({ message: 'Server error submitting verification request.' });
+  }
+});
+
 module.exports = router;
