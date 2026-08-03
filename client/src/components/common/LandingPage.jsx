@@ -92,8 +92,8 @@ const LandingPage = () => {
       {/* ─── HERO SECTION ────────────────────────────────────────────────────── */}
       <section className="relative pt-16 pb-20 md:py-28 overflow-hidden px-6">
         {/* Colorful backgrounds blobs */}
-        <div className="absolute top-[-10%] left-[-15%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 dark:opacity-10 animate-pulse"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 dark:opacity-10 animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-[-10%] left-[-15%] w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 dark:opacity-10 animate-blob"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 dark:opacity-10 animate-blob animation-delay-2000"></div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
