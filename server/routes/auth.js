@@ -588,32 +588,28 @@ router.post('/submit-registration-request', async (req, res) => {
   }
 
   try {
-    // Check if user already exists
+    // Check if user already exists in users table
     const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existingUsers.length > 0) {
-      return res.status(400).json({ message: 'User already exists with this email address.' });
+      return res.status(400).json({ message: 'An account already exists with this email address. Please use the login page.' });
     }
 
-    // Check if a pending or approved request exists
+    // Check if a pending request exists
     const [existingRequests] = await pool.query(
-      'SELECT id, status FROM registration_requests WHERE email = ? AND status IN ("pending", "approved")',
+      'SELECT id, status FROM registration_requests WHERE email = ? AND status = "pending"',
       [email]
     );
 
     if (existingRequests.length > 0) {
       const existing = existingRequests[0];
-      if (existing.status === 'approved') {
-        return res.status(400).json({ message: 'This email has already been approved. Please use the login page.' });
-      } else if (existing.status === 'pending') {
-        // Update the existing pending request with the latest details and update the submission timestamp
-        await pool.query(
-          `UPDATE registration_requests 
-           SET full_name = ?, role = ?, id_number = ?, message = ?, created_at = CURRENT_TIMESTAMP
-           WHERE id = ?`,
-          [full_name.trim(), role, id_number.trim(), message.trim(), existing.id]
-        );
-        return res.json({ message: 'Your existing verification request has been updated with the latest details.' });
-      }
+      // Update the existing pending request with the latest details and update the submission timestamp
+      await pool.query(
+        `UPDATE registration_requests 
+         SET full_name = ?, role = ?, id_number = ?, message = ?, created_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [full_name.trim(), role, id_number.trim(), message.trim(), existing.id]
+      );
+      return res.json({ message: 'Your existing verification request has been updated with the latest details.' });
     }
 
     // Insert new request
