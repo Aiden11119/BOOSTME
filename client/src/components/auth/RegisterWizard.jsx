@@ -615,14 +615,14 @@ const RegisterWizard = () => {
       )}
 
       {/* Peeking Mascot with speech bubble */}
-      <div className="absolute bottom-0 right-2 lg:bottom-6 lg:right-16 z-20 flex items-end gap-3">
-        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-white/40 max-w-[220px] mb-8 relative after:content-[''] after:absolute after:bottom-0 after:right-6 after:w-0 after:h-0 after:border-t-[8px] after:border-t-white/80 after:border-x-[6px] after:border-x-transparent after:translate-y-full">
+      <div className="absolute bottom-0 right-0 lg:bottom-4 lg:right-8 z-0 flex items-end gap-2">
+        <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-3 py-2 rounded-2xl shadow-xl border border-white/40 max-w-[180px] mb-6 relative after:content-[''] after:absolute after:bottom-0 after:right-4 after:w-0 after:h-0 after:border-t-[6px] after:border-t-white/80 after:border-x-[4px] after:border-x-transparent after:translate-y-full">
           💡 Registering is easy! Failing is easier, so sign up now! 🐾
         </div>
         <img 
           src="/study-mascot.png" 
           alt="Mascot peak" 
-          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
+          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-32 lg:h-32 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
         />
       </div>
     </div>
