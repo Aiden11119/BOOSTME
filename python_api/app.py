@@ -194,5 +194,6 @@ def predict():
         return jsonify({"error": str(e), "success": False}), 500
 
 if __name__ == '__main__':
-    print("Starting Flask server with RF + Metric Learning Pipeline on port 5001...")
-    app.run(port=5001, debug=True)
+    port = int(os.environ.get('PORT', 7860))
+    print(f"Starting Flask server with RF + Metric Learning Pipeline on port {port}...")
+    app.run(host='0.0.0.0', port=port, debug=False)
