@@ -27,7 +27,8 @@ const allowedOrigins = [
   'http://localhost:5173',   // Vite dev server
   'http://localhost:5000',   // If serving from same port
   'http://127.0.0.1:5173',
-];
+  process.env.FRONTEND_URL   // Deployed Vercel frontend URL
+].filter(Boolean);
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, Postman in dev)

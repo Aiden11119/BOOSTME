@@ -33,7 +33,8 @@ router.post('/predict', verifyToken, verifyRole(['student']), async (req, res) =
     let predictedGrade;
     let xaiExplanations = null;
     try {
-      const flaskResponse = await axios.post('http://127.0.0.1:5001/predict', flaskPayload);
+      const pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5001';
+      const flaskResponse = await axios.post(`${pythonApiUrl}/predict`, flaskPayload);
       predictedGrade = flaskResponse.data.predicted_grade;
       xaiExplanations = flaskResponse.data.xai_explanations || null;
       if (!predictedGrade) throw new Error("No grade string in response.");
