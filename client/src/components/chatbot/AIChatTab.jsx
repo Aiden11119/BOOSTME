@@ -74,7 +74,8 @@ const AIChatTab = () => {
 
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch('/api/chatbot/chat', {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${baseUrl}/api/chatbot/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
