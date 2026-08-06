@@ -2,19 +2,21 @@ require('dotenv').config();
 const mysql = require('mysql2/promise');
 
 // Setup connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'boastme',
-  port: process.env.DB_PORT || 3306,
-  ssl: {
-    rejectUnauthorized: false // Required for Aiven SSL connections
-  },
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const pool = process.env.DB_URI 
+  ? mysql.createPool(process.env.DB_URI)
+  : mysql.createPool({
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'boastme',
+      port: process.env.DB_PORT || 3306,
+      ssl: {
+        rejectUnauthorized: false // Required for Aiven SSL connections
+      },
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
 
 // Initialize database tables
 const initializeDB = async () => {
