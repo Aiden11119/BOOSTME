@@ -31,7 +31,7 @@ router.put('/users/:id/status', verifyToken, verifyRole(['admin']), async (req, 
   }
 
   try {
-    await pool.query('UPDATE users SET is_active = ? WHERE id = ? AND role != "admin"', [is_active, userId]);
+    await pool.query('UPDATE users SET is_active = ? WHERE id = ? AND role != \'admin\'', [is_active, userId]);
     res.json({ message: `User status updated to ${is_active ? 'active' : 'inactive'}.` });
   } catch (error) {
     console.error('Error updating user status:', error);
@@ -92,7 +92,7 @@ router.put('/settings/maintenance', verifyToken, verifyRole(['admin']), async (r
 
   try {
     await pool.query(
-      'UPDATE system_settings SET setting_value = ? WHERE setting_key = "maintenance_mode"',
+      'UPDATE system_settings SET setting_value = ? WHERE setting_key = \'maintenance_mode\'',
       [value]
     );
     res.json({ message: `Maintenance mode is now ${value === 'true' ? 'ON' : 'OFF'}.` });
@@ -106,7 +106,7 @@ router.put('/settings/maintenance', verifyToken, verifyRole(['admin']), async (r
 router.get('/registration-requests', verifyToken, verifyRole(['admin']), async (req, res) => {
   try {
     const [requests] = await pool.query(
-      'SELECT id, full_name, email, role, id_number, message, request_type, created_at FROM registration_requests WHERE status = "pending" ORDER BY created_at DESC'
+      'SELECT id, full_name, email, role, id_number, message, request_type, created_at FROM registration_requests WHERE status = \'pending\' ORDER BY created_at DESC'
     );
     res.json(requests);
   } catch (error) {

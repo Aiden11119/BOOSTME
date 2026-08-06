@@ -334,7 +334,7 @@ router.post('/login', async (req, res) => {
     const user = users[0];
 
     // Check Maintenance Mode
-    const [settings] = await pool.query('SELECT setting_value FROM system_settings WHERE setting_key = "maintenance_mode"');
+    const [settings] = await pool.query('SELECT setting_value FROM system_settings WHERE setting_key = \'maintenance_mode\'');
     const isMaintenance = settings.length > 0 && settings[0].setting_value === 'true';
     if (isMaintenance && user.role !== 'admin') {
       return res.status(503).json({ 
@@ -596,7 +596,7 @@ router.post('/submit-registration-request', async (req, res) => {
 
     // Check if a pending request exists
     const [existingRequests] = await pool.query(
-      'SELECT id, status FROM registration_requests WHERE email = ? AND status = "pending"',
+      'SELECT id, status FROM registration_requests WHERE email = ? AND status = \'pending\'',
       [email]
     );
 
@@ -661,7 +661,7 @@ router.post('/submit-reset-request', async (req, res) => {
 
     // 3. Check for existing pending reset request
     const [existingRequests] = await pool.query(
-      'SELECT id FROM registration_requests WHERE email = ? AND request_type = "reset_password" AND status = "pending"',
+      'SELECT id FROM registration_requests WHERE email = ? AND request_type = \'reset_password\' AND status = \'pending\'',
       [email.trim().toLowerCase()]
     );
 

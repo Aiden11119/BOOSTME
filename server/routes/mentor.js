@@ -23,7 +23,7 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/slots/:mentor_id', verifyToken, async (req, res) => {
   try {
     const [slots] = await pool.query(
-      'SELECT appointment_id as slot_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = "available" AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
+      'SELECT appointment_id as slot_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = \'available\' AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
       [req.params.mentor_id]
     );
     res.json(slots);
@@ -58,7 +58,7 @@ router.post('/slots', verifyToken, verifyRole(['mentor']), async (req, res) => {
   try {
     // Check if slot already exists for that mentor and time
     const [existing] = await pool.query(
-      'SELECT * FROM appointments WHERE mentor_id = ? AND appointment_date = ? AND start_time = ? AND status != "cancelled"',
+      'SELECT * FROM appointments WHERE mentor_id = ? AND appointment_date = ? AND start_time = ? AND status != \'cancelled\'',
       [mentor_id, slot_date, start_time]
     );
     if (existing.length > 0) {
@@ -80,7 +80,7 @@ router.post('/slots', verifyToken, verifyRole(['mentor']), async (req, res) => {
 router.delete('/slots/:id', verifyToken, verifyRole(['mentor']), async (req, res) => {
   try {
     const [result] = await pool.query(
-      'DELETE FROM appointments WHERE appointment_id = ? AND mentor_id = ? AND status = "available" AND student_id IS NULL',
+      'DELETE FROM appointments WHERE appointment_id = ? AND mentor_id = ? AND status = \'available\' AND student_id IS NULL',
       [req.params.id, req.user.userId]
     );
     if (result.affectedRows === 0) {
@@ -101,7 +101,7 @@ router.post('/book', verifyToken, verifyRole(['student']), async (req, res) => {
   try {
     // If booking via a specific slot
     if (slot_id) {
-      const [slots] = await pool.query('SELECT * FROM appointments WHERE appointment_id = ? AND status = "available" AND student_id IS NULL', [slot_id]);
+      const [slots] = await pool.query('SELECT * FROM appointments WHERE appointment_id = ? AND status = \'available\' AND student_id IS NULL', [slot_id]);
       if (slots.length === 0) {
         return res.status(400).json({ message: 'Slot is no longer available' });
       }

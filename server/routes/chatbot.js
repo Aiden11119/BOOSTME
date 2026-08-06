@@ -158,7 +158,7 @@ async function handleToolCall(functionCall, studentId) {
   
   try {
     if (name === 'get_mentors') {
-      const [mentors] = await pool.query('SELECT id, full_name, email, specialty_description FROM users WHERE role = "mentor"');
+      const [mentors] = await pool.query('SELECT id, full_name, email, specialty_description FROM users WHERE role = \'mentor\'');
       return { result: mentors };
     }
     
@@ -176,7 +176,7 @@ async function handleToolCall(functionCall, studentId) {
       const { mentor_id, slot_id, appointment_date, start_time, end_time } = args;
       
       // Verify slot is still available
-      const [slots] = await pool.query('SELECT * FROM appointments WHERE appointment_id = ? AND status = "available" AND student_id IS NULL', [slot_id]);
+      const [slots] = await pool.query('SELECT * FROM appointments WHERE appointment_id = ? AND status = \'available\' AND student_id IS NULL', [slot_id]);
       if (slots.length === 0) {
         return { error: 'Sorry, that slot is no longer available. Please choose another.' };
       }
