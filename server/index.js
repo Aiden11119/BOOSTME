@@ -17,6 +17,9 @@ const path = require('path');
 
 const app = express();
 
+// Trust the reverse proxy (Render) so rate limiting works correctly
+app.set('trust proxy', 1);
+
 // ─── Security Middleware ─────────────────────────────────────────────────────
 
 // Helmet: sets various HTTP security headers (X-Frame-Options, CSP, etc.)
