@@ -182,7 +182,7 @@ async function handleToolCall(functionCall, studentId) {
       }
 
       // Book it
-      await pool.query('UPDATE appointments SET student_id = ?, status = "pending" WHERE appointment_id = ?', [studentId, slot_id]);
+      await pool.query('UPDATE appointments SET student_id = ?, status = \'pending\' WHERE appointment_id = ?', [studentId, slot_id]);
       
       return { 
         result: 'Successfully booked!', 
@@ -227,7 +227,7 @@ async function handleToolCall(functionCall, studentId) {
     if (name === 'cancel_appointment') {
       const { appointment_id } = args;
       const [result] = await pool.query(
-        'UPDATE appointments SET student_id = NULL, status = "available" WHERE appointment_id = ? AND student_id = ?',
+        'UPDATE appointments SET student_id = NULL, status = \'available\' WHERE appointment_id = ? AND student_id = ?',
         [appointment_id, studentId]
       );
       if (result.affectedRows === 0) {
@@ -278,7 +278,7 @@ router.post('/chat', verifyToken, verifyRole(['student']), async (req, res) => {
 
   try {
     // Save user message to DB
-    await pool.query('INSERT INTO chat_messages (student_id, role, message_text) VALUES (?, "user", ?)', [studentId, message]);
+    await pool.query('INSERT INTO chat_messages (student_id, role, message_text) VALUES (?, \'user\', ?)', [studentId, message]);
 
     // Fetch history from DB
     const [historyRows] = await pool.query(
@@ -372,7 +372,7 @@ router.post('/chat', verifyToken, verifyRole(['student']), async (req, res) => {
     res.end();
 
     // Save AI response to DB
-    await pool.query('INSERT INTO chat_messages (student_id, role, message_text) VALUES (?, "ai", ?)', [studentId, finalResponseText]);
+    await pool.query('INSERT INTO chat_messages (student_id, role, message_text) VALUES (?, \'ai\', ?)', [studentId, finalResponseText]);
 
   } catch (error) {
     console.error('Gemini Chat Error:', error);
