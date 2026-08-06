@@ -75,7 +75,9 @@ const AIChatWidget = () => {
 
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      let baseUrl = import.meta.env.VITE_API_URL || '';
+      // Ensure we don't end up with /api/api/chatbot/chat if the user included /api in the env var
+      baseUrl = baseUrl.replace(/\/api\/?$/, '');
       const response = await fetch(`${baseUrl}/api/chatbot/chat`, {
         method: 'POST',
         headers: {
