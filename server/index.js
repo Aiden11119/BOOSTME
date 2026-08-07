@@ -121,6 +121,11 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/announcements', announcementsRoutes);
 
+// Health check route for UptimeRobot / cron-job to ping
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'healthy', message: 'Node.js Server is awake!' });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

@@ -8,6 +8,10 @@ import numpy as np
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "message": "ML API is awake!"}), 200
+
 import torch
 import torch.nn as nn
 
