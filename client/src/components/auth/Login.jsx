@@ -129,7 +129,7 @@ const Login = () => {
         <img 
           src="/study-mascot.png" 
           alt="Coffee Cat" 
-          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 object-contain rotate-[-5deg] transform hover:scale-105 transition-transform duration-300" 
         />
       </div>
 
@@ -138,7 +138,7 @@ const Login = () => {
         <img 
           src="/study-owl.png" 
           alt="Nerdy Owl" 
-          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain rotate-[5deg] transform hover:scale-105 transition-transform duration-300" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 object-contain rotate-[5deg] transform hover:scale-105 transition-transform duration-300" 
         />
         <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-white/40 max-w-[220px] mb-8 relative after:content-[''] after:absolute after:bottom-0 after:left-6 after:w-0 after:h-0 after:border-t-[8px] after:border-t-white/80 after:border-x-[6px] after:border-x-transparent after:translate-y-full">
           💡 Wait, did I submit the assignment on time?! 🦉
@@ -150,7 +150,7 @@ const Login = () => {
         <img 
           src="/study-hamster.png" 
           alt="Stressed Hamster" 
-          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain transform hover:scale-105 transition-transform duration-300" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 object-contain transform hover:scale-105 transition-transform duration-300" 
         />
         <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl border border-white/40 max-w-[200px] text-center relative after:content-[''] after:absolute after:top-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-b-[8px] after:border-b-white/80 after:border-x-[6px] after:border-x-transparent after:-translate-y-full">
           😭 Is 1 + 1 = 11? Just let me pass... 🐹
@@ -162,7 +162,7 @@ const Login = () => {
         <img 
           src="/study-koala.png" 
           alt="Sleeping Koala" 
-          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-48 lg:h-48 object-contain transform hover:scale-105 transition-transform duration-300" 
+          className="w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 object-contain transform hover:scale-105 transition-transform duration-300" 
         />
         <div className="hidden lg:block bg-white/80 backdrop-blur-md text-gray-800 text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl border border-white/40 max-w-[200px] text-center relative after:content-[''] after:absolute after:top-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-b-[8px] after:border-b-white/80 after:border-x-[6px] after:border-x-transparent after:-translate-y-full">
           😴 Just 5 more minutes... Is it graduation yet? 🐨🎓
