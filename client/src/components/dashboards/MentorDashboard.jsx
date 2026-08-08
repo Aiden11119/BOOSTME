@@ -203,26 +203,34 @@ const AppointmentsTab = () => {
     updateStatus(id, 'confirmed');
   };
 
-  return (
-    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in-up">
+  const processedAppointments = appointments.map(app => {
+    const rawDate = app.appointment_date.split('T')[0];
+    const [sh, sm] = app.start_time.split(':').map(Number);
+    const apptEndDateTime = new Date(rawDate);
+    apptEndDateTime.setHours(sh + 1, sm, 0, 0);
+    const isDone = app.status !== 'cancelled' && apptEndDateTime < new Date();
+    return { ...app, isDone };
+  });
+
+  const pendingList = processedAppointments.filter(app => app.status === 'pending');
+  const upcomingList = processedAppointments.filter(app => app.status === 'confirmed' && !app.isDone);
+  const doneList = processedAppointments.filter(app => app.status === 'cancelled' || app.isDone);
+
+  const renderAppList = (list, title, description, emptyMsg) => (
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Upcoming Appointments</h2>
-          <p className="text-gray-500 text-sm mt-1">Manage your counseling sessions</p>
+          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+          <p className="text-gray-500 text-sm mt-1">{description}</p>
+        </div>
+        <div className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-semibold">
+          {list.length}
         </div>
       </div>
       <div className="divide-y divide-gray-100">
-        {appointments.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No appointments scheduled.</div>
-        ) : appointments.map((app) => {
-          // Build a timezone-safe Date from the raw date + start_time, then add 1hr for end time
-          const rawDate = app.appointment_date.split('T')[0]; // "2026-04-09"
-          const [sh, sm] = app.start_time.split(':').map(Number);
-          const apptEndDateTime = new Date(rawDate);
-          apptEndDateTime.setHours(sh + 1, sm, 0, 0); // end = start + 1 hour
-          const isDone = app.status !== 'cancelled' && apptEndDateTime < new Date();
-
-          return (
+        {list.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">{emptyMsg}</div>
+        ) : list.map((app) => (
           <div key={app.appointment_id} className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-4 w-full sm:w-auto">
               <img src={app.avatar_url || 'https://via.placeholder.com/50'} alt="student" className="w-12 h-12 rounded-full border border-gray-200" />
@@ -239,7 +247,7 @@ const AppointmentsTab = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                {isDone ? (
+                {app.isDone ? (
                   <span className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-bold flex items-center gap-1">
                     <CheckCircle className="w-3.5 h-3.5" /> Done
                   </span>
@@ -275,9 +283,16 @@ const AppointmentsTab = () => {
               </div>
             </div>
           </div>
-          );
-        })}
+        ))}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="animate-fade-in-up">
+      {renderAppList(pendingList, 'Action Required: Pending', 'New requests waiting for your approval', 'No pending requests at the moment.')}
+      {renderAppList(upcomingList, 'Upcoming Appointments', 'Your confirmed upcoming sessions', 'No upcoming sessions.')}
+      {renderAppList(doneList, 'Past & Cancelled', 'History of your past appointments', 'No past appointments.')}
 
       {/* Cancel Confirmation Modal */}
       {cancelPromptId && (
