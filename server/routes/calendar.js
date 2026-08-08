@@ -15,15 +15,15 @@ const scopes = [
   'https://www.googleapis.com/auth/calendar.events',
 ];
 
-// Initiate OAuth flow
-router.get('/auth', verifyToken, verifyRole(['mentor']), (req, res) => {
+// Get OAuth URL
+router.get('/auth-url', verifyToken, verifyRole(['mentor']), (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent', // Force to get refresh token
     scope: scopes,
     state: req.user.userId.toString(), // Pass mentor ID to callback
   });
-  res.redirect(url);
+  res.json({ url });
 });
 
 // OAuth Callback

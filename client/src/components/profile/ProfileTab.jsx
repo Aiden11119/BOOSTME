@@ -166,6 +166,15 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
     }
   };
 
+  const handleConnectCalendar = async () => {
+    try {
+      const res = await api.get('/calendar/auth-url');
+      window.location.href = res.data.url;
+    } catch (err) {
+      toast.error('Failed to get calendar URL');
+    }
+  };
+
   // ── Loading / error guards ───────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -615,12 +624,12 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
               </div>
             </div>
             
-            <a
-              href={`${API_BASE_URL}/calendar/auth`}
+            <button
+              onClick={handleConnectCalendar}
               className={`px-5 py-2.5 ${accent.btn} text-white rounded-xl font-semibold shadow-sm transition-all hover:-translate-y-0.5 text-sm whitespace-nowrap`}
             >
               Connect Calendar
-            </a>
+            </button>
           </div>
         </div>
       )}
