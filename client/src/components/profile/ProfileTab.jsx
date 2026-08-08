@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo, Camera, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Sun, Moon, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import api, { API_BASE_URL } from '../../services/api';
 import { COURSES } from '../../constants/courses';
 import { useAuth } from '../../context/AuthContext';
 
@@ -616,7 +616,7 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
             </div>
             
             <a
-              href="http://localhost:5000/api/calendar/auth"
+              href={`${API_BASE_URL}/calendar/auth`}
               className={`px-5 py-2.5 ${accent.btn} text-white rounded-xl font-semibold shadow-sm transition-all hover:-translate-y-0.5 text-sm whitespace-nowrap`}
             >
               Connect Calendar
