@@ -7,6 +7,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import ProfileTab from '../profile/ProfileTab';
 import GlobalAnnouncement from '../common/GlobalAnnouncement';
 
@@ -155,6 +156,7 @@ const ScheduleTab = () => {
 };
 
 const AppointmentsTab = () => {
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [cancelPromptId, setCancelPromptId] = useState(null);
 
@@ -183,6 +185,22 @@ const AppointmentsTab = () => {
     } catch (err) {
       toast.error('Status update failed');
     }
+  };
+
+  const handleConfirm = async (id) => {
+    if (!user.has_google_calendar) {
+      const connect = window.confirm("You haven't connected Google Calendar yet. A Google Meet link cannot be automatically generated.\n\nDo you want to connect now? (Click 'Cancel' if you want to confirm this appointment without a Google Meet link).");
+      if (connect) {
+        try {
+          const res = await api.get('/calendar/auth-url');
+          window.location.href = res.data.url;
+        } catch (err) {
+          toast.error('Failed to get calendar URL');
+        }
+        return; // Don't proceed with confirmation yet
+      }
+    }
+    updateStatus(id, 'confirmed');
   };
 
   return (
@@ -231,7 +249,7 @@ const AppointmentsTab = () => {
                   <>
                     {app.status === 'pending' && (
                       <>
-                        <button onClick={() => updateStatus(app.appointment_id, 'confirmed')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Confirm">
+                        <button onClick={() => handleConfirm(app.appointment_id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Confirm">
                           <CheckCircle className="w-6 h-6" />
                         </button>
                         <button onClick={() => setCancelPromptId(app.appointment_id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Cancel">

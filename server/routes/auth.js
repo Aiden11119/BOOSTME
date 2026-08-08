@@ -380,6 +380,7 @@ router.post('/login', async (req, res) => {
         semester: user.semester,
         student_id_number: user.student_id_number,
         specialty_description: user.specialty_description,
+        has_google_calendar: !!user.google_refresh_token,
         courses
       }
     });
@@ -397,7 +398,8 @@ router.get('/profile', verifyToken, async (req, res) => {
     const [rows] = await pool.query(
       `SELECT id, role, full_name, email, avatar_url,
               student_id_number, department, semester, age, gender, family_income_level,
-              specialty_description, created_at
+              specialty_description, created_at,
+              IF(google_refresh_token IS NOT NULL, true, false) as has_google_calendar
        FROM users WHERE id = ?`,
       [userId]
     );
@@ -464,7 +466,8 @@ router.put('/profile', verifyToken, async (req, res) => {
     const [rows] = await pool.query(
       `SELECT id, role, full_name, email, avatar_url,
               student_id_number, department, semester, age, gender, family_income_level,
-              specialty_description
+              specialty_description,
+              IF(google_refresh_token IS NOT NULL, true, false) as has_google_calendar
        FROM users WHERE id = ?`,
       [userId]
     );
