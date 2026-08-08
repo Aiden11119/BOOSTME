@@ -24,7 +24,7 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/slots/:mentor_id', verifyToken, async (req, res) => {
   try {
     const [slots] = await pool.query(
-      'SELECT appointment_id as slot_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = \'available\' AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
+      'SELECT appointment_id as slot_id, DATE_FORMAT(appointment_date, \'%Y-%m-%d\') as slot_date, start_time, end_time FROM appointments WHERE mentor_id = ? AND status = \'available\' AND student_id IS NULL AND appointment_date >= CURDATE() ORDER BY appointment_date, start_time',
       [req.params.mentor_id]
     );
     res.json(slots);
@@ -41,7 +41,7 @@ router.get('/day-slots', verifyToken, verifyRole(['mentor']), async (req, res) =
     if (!date) return res.status(400).json({ message: 'Date is required' });
     
     const [slots] = await pool.query(
-      'SELECT appointment_id, mentor_id, student_id, DATE_FORMAT(appointment_date, "%Y-%m-%d") as appointment_date, start_time, end_time, status, created_at FROM appointments WHERE mentor_id = ? AND appointment_date = ? ORDER BY start_time',
+      'SELECT appointment_id, mentor_id, student_id, DATE_FORMAT(appointment_date, \'%Y-%m-%d\') as appointment_date, start_time, end_time, status, created_at FROM appointments WHERE mentor_id = ? AND appointment_date = ? ORDER BY start_time',
       [req.user.userId, date]
     );
     res.json(slots);
@@ -67,7 +67,7 @@ router.post('/slots', verifyToken, verifyRole(['mentor']), async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'INSERT INTO appointments (mentor_id, appointment_date, start_time, end_time, status, student_id) VALUES (?, ?, ?, ?, "available", NULL)',
+      'INSERT INTO appointments (mentor_id, appointment_date, start_time, end_time, status, student_id) VALUES (?, ?, ?, ?, \'available\', NULL)',
       [mentor_id, slot_date, start_time, end_time]
     );
     res.status(201).json({ message: 'Slot created successfully', appointment_id: result.insertId });
@@ -127,7 +127,7 @@ router.post('/book', verifyToken, verifyRole(['student']), async (req, res) => {
 
     if (slot_id) {
       // Just update it if slot_id is provided
-      await pool.query('UPDATE appointments SET student_id = ?, status = "pending" WHERE appointment_id = ?', [student_id, slot_id]);
+      await pool.query('UPDATE appointments SET student_id = ?, status = \'pending\' WHERE appointment_id = ?', [student_id, slot_id]);
       res.status(201).json({ message: 'Appointment booked successfully', appointment_id: slot_id });
     } else {
       // Freeform insertion (legacy behavior fallback)

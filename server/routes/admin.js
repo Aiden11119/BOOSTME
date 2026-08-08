@@ -136,7 +136,7 @@ router.post('/registration-requests/:id/approve', verifyToken, verifyRole(['admi
       // Check if user already exists
       const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [request.email]);
       if (existingUsers.length > 0) {
-        await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
+        await pool.query('UPDATE registration_requests SET status = \'rejected\' WHERE id = ?', [requestId]);
         return res.status(400).json({ message: 'User already exists. Auto-rejecting this request.' });
       }
 
@@ -158,7 +158,7 @@ router.post('/registration-requests/:id/approve', verifyToken, verifyRole(['admi
       );
 
       // Update request status to approved
-      await pool.query('UPDATE registration_requests SET status = "approved" WHERE id = ?', [requestId]);
+      await pool.query('UPDATE registration_requests SET status = \'approved\' WHERE id = ?', [requestId]);
 
       // Send welcome email to user
       const subject = 'Your BoostMe Registration Request is Approved!';
@@ -195,7 +195,7 @@ router.post('/registration-requests/:id/approve', verifyToken, verifyRole(['admi
       // Verify user exists
       const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [request.email]);
       if (existingUsers.length === 0) {
-        await pool.query('UPDATE registration_requests SET status = "rejected" WHERE id = ?', [requestId]);
+        await pool.query('UPDATE registration_requests SET status = \'rejected\' WHERE id = ?', [requestId]);
         return res.status(400).json({ message: 'User account not found. Auto-rejecting this request.' });
       }
 
@@ -207,7 +207,7 @@ router.post('/registration-requests/:id/approve', verifyToken, verifyRole(['admi
       await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [password_hash, request.email]);
 
       // Update request status to approved
-      await pool.query('UPDATE registration_requests SET status = "approved" WHERE id = ?', [requestId]);
+      await pool.query('UPDATE registration_requests SET status = \'approved\' WHERE id = ?', [requestId]);
 
       // Send password reset notification email
       const subject = 'Your BoostMe Password Has Been Reset';
