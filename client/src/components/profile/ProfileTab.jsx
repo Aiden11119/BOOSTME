@@ -472,7 +472,7 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
         </div>
 
         {/* Field grid */}
-        {isEditing ? <EditContent /> : <ViewContent />}
+        {isEditing ? EditContent() : ViewContent()}
       </div>
 
       {/* Change Password Section */}
