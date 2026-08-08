@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/admin');
 const announcementsRoutes = require('./routes/announcements');
 
 const path = require('path');
+const pool = require('./config/db');
 
 const app = express();
 
@@ -124,6 +125,17 @@ app.use('/api/announcements', announcementsRoutes);
 // Health check route for UptimeRobot / cron-job to ping
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'healthy', message: 'Node.js Server is awake!' });
+});
+
+// Database ping route to keep both Render and Aiven awake
+app.get('/ping-db', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).send('Render server and Aiven Database are awake!');
+  } catch (error) {
+    console.error('Wake up ping failed:', error);
+    res.status(500).send('Database connection error');
+  }
 });
 
 const PORT = process.env.PORT || 5000;
