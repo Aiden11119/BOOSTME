@@ -111,6 +111,9 @@ const ScheduleTab = () => {
               const suffix = hourInt >= 12 ? 'PM' : 'AM';
               const displayHour = hourInt > 12 ? hourInt - 12 : hourInt;
               const displayTime = `${displayHour}:00 ${suffix}`;
+              
+              const slotDateTime = new Date(`${selectedDate}T${timeStr}`);
+              const isPast = slotDateTime < new Date();
 
               // State 3: Booked (confirmed or pending, has a student_id usually)
               if (slotData && slotData.student_id !== null && slotData.status !== 'available') {
@@ -124,11 +127,11 @@ const ScheduleTab = () => {
               // State 2: Free / Available
               if (slotData && slotData.status === 'available') {
                 return (
-                  <div key={timeStr} className="relative flex items-center justify-center p-3 rounded-xl bg-green-50 text-green-700 border border-green-200 font-medium group transition-all shrink-0">
-                    <span className="flex-1 text-center">{displayTime} - Free</span>
+                  <div key={timeStr} className={`relative flex items-center justify-center p-3 rounded-xl ${isPast ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-green-50 text-green-700 border-green-200'} border font-medium group transition-all shrink-0`}>
+                    <span className="flex-1 text-center">{displayTime} {isPast ? '- Passed' : '- Free'}</span>
                     <button
                       onClick={() => handleDeleteSlot(slotData.appointment_id)}
-                      className="absolute right-2 p-1 text-green-600 hover:text-red-500 hover:bg-red-50 rounded bg-white/50 transition-colors"
+                      className={`absolute right-2 p-1 rounded bg-white/50 transition-colors ${isPast ? 'text-gray-400 hover:text-gray-600' : 'text-green-600 hover:text-red-500 hover:bg-red-50'}`}
                       title="Remove availability"
                     >
                       <XCircle className="w-4 h-4" />
@@ -137,7 +140,16 @@ const ScheduleTab = () => {
                 );
               }
 
-              // State 1: Empty / Unselected
+              // State 4: Past Empty
+              if (isPast) {
+                return (
+                  <div key={timeStr} className="p-3 rounded-xl bg-gray-50 text-gray-400 border border-gray-200 font-medium text-center cursor-not-allowed">
+                    {displayTime} - Passed
+                  </div>
+                );
+              }
+
+              // State 1: Empty / Unselected (Future)
               return (
                 <button
                   key={timeStr}
