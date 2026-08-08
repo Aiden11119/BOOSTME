@@ -122,6 +122,9 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/announcements', announcementsRoutes);
 
+const { router: calendarRoutes } = require('./routes/calendar');
+app.use('/api/calendar', calendarRoutes);
+
 // Health check route for UptimeRobot / cron-job to ping
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'healthy', message: 'Node.js Server is awake!' });

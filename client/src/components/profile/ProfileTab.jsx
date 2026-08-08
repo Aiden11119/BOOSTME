@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo, Camera, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Sun, Moon } from 'lucide-react';
+import { Pencil, X, Save, User, Mail, BookOpen, IdCard, GraduationCap, BadgeInfo, Camera, Lock, Eye, EyeOff, ChevronDown, ChevronUp, Sun, Moon, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { COURSES } from '../../constants/courses';
@@ -600,6 +600,30 @@ const ProfileTab = ({ accentColor = 'blue' }) => {
           </button>
         </div>
       </div>
+
+      {/* Google Calendar Integration Section (Mentor only) */}
+      {role === 'mentor' && (
+        <div className={`bg-white rounded-3xl shadow-sm border ${accent.border} overflow-hidden`}>
+          <div className="p-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl ${accent.badge}`}>
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900">Google Calendar Integration</h3>
+                <p className="text-sm text-gray-500">Automatically generate Google Meet links for appointments</p>
+              </div>
+            </div>
+            
+            <a
+              href="http://localhost:5000/api/calendar/auth"
+              className={`px-5 py-2.5 ${accent.btn} text-white rounded-xl font-semibold shadow-sm transition-all hover:-translate-y-0.5 text-sm whitespace-nowrap`}
+            >
+              Connect Calendar
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Member since footer */}
       <p className="text-center text-xs text-gray-300">

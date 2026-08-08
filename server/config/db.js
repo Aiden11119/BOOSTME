@@ -55,8 +55,9 @@ const initializeDB = async () => {
       // Force update existing table structure just in case it already existed
       await pool.query("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'lecturer', 'mentor', 'admin') NOT NULL");
       await pool.query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+      await pool.query("ALTER TABLE users ADD COLUMN google_refresh_token TEXT");
     } catch (alterErr) {
-      console.log('Note: ALTER users skipped or already applied.');
+      console.log('Note: ALTER users skipped or already applied.', alterErr.message);
     }
 
     // Create prediction_history table
@@ -101,8 +102,9 @@ const initializeDB = async () => {
       // Force update existing table structure just in case it already existed
       await pool.query("ALTER TABLE appointments MODIFY COLUMN student_id INT NULL");
       await pool.query("ALTER TABLE appointments MODIFY COLUMN status ENUM('available', 'pending', 'confirmed', 'cancelled') DEFAULT 'available'");
+      await pool.query("ALTER TABLE appointments ADD COLUMN meet_link VARCHAR(255)");
     } catch (alterErr) {
-      console.log('Note: ALTER appointments skipped or already applied.');
+      console.log('Note: ALTER appointments skipped or already applied.', alterErr.message);
     }
 
     // Create mentor_slots table

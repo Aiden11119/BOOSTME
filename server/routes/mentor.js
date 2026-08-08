@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const sendEmail = require('../utils/email');
+const { createGoogleMeet } = require('./calendar');
 
 // Get all Mentors (Any authenticated user, mostly for Students)
 router.get('/', verifyToken, async (req, res) => {
@@ -249,6 +250,33 @@ router.put('/:id/status', verifyToken, verifyRole(['mentor']), async (req, res) 
           </div>
         `;
         sendEmail(studentToNotify.email, 'Appointment Cancelled - BoostMe', emailHtml).catch(e => console.error(e));
+    }
+
+    // Generate Google Meet Link if Confirmed
+    if (status === 'confirmed') {
+        const [appts] = await pool.query('SELECT appointment_date, start_time, end_time, student_id FROM appointments WHERE appointment_id = ?', [appointment_id]);
+        if (appts.length > 0) {
+            const appt = appts[0];
+            const [students] = await pool.query('SELECT full_name FROM users WHERE id = ?', [appt.student_id]);
+            const studentName = students.length > 0 ? students[0].full_name : 'Student';
+            
+            // Format dates for Google Calendar RFC3339
+            const dateStr = appt.appointment_date.toISOString().split('T')[0];
+            const startDateTime = `${dateStr}T${appt.start_time}+08:00`;
+            const endDateTime = `${dateStr}T${appt.end_time}+08:00`;
+
+            const meetLink = await createGoogleMeet(mentor_id, {
+                appointmentId: appointment_id,
+                summary: `Mentoring Session with ${studentName}`,
+                description: 'BoostMe Mentoring Session',
+                startDateTime,
+                endDateTime
+            });
+
+            if (meetLink) {
+                await pool.query('UPDATE appointments SET meet_link = ? WHERE appointment_id = ?', [meetLink, appointment_id]);
+            }
+        }
     }
 
     res.json({ message: `Appointment ${status} successfully` });

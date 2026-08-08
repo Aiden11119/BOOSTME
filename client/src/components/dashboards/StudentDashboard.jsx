@@ -726,12 +726,22 @@ const MentorsTab = () => {
                         <CheckCircle className="w-4 h-4" /> Done
                       </span>
                     ) : (
-                      <button 
-                        onClick={() => setCancelPromptId(booking.appointment_id)}
-                        className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors"
-                      >
-                        Cancel Booking
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {booking.status === 'confirmed' && booking.meet_link && (
+                          <a href={booking.meet_link} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-bold transition-colors border border-blue-200">
+                            Join Meet
+                          </a>
+                        )}
+                        {booking.status === 'confirmed' && (
+                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold mr-2">Confirmed</span>
+                        )}
+                        <button 
+                          onClick={() => setCancelPromptId(booking.appointment_id)}
+                          className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors"
+                        >
+                          Cancel Booking
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

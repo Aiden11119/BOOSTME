@@ -241,6 +241,11 @@ const AppointmentsTab = () => {
                     )}
                     {app.status === 'confirmed' && (
                       <>
+                        {app.meet_link && (
+                          <a href={app.meet_link} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-bold mr-2 transition-colors border border-blue-200">
+                            Join Meet
+                          </a>
+                        )}
                         <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold mr-2">Confirmed</span>
                         <button onClick={() => setCancelPromptId(app.appointment_id)} className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors">
                           Cancel Session
