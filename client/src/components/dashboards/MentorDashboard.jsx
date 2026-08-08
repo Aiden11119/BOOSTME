@@ -290,9 +290,9 @@ const AppointmentsTab = () => {
 
   return (
     <div className="animate-fade-in-up">
-      {renderAppList(pendingList, 'Action Required: Pending', 'New requests waiting for your approval', 'No pending requests at the moment.')}
+      {renderAppList(pendingList, 'Pending', 'New requests waiting for your approval', 'No pending requests at the moment.')}
       {renderAppList(upcomingList, 'Upcoming Appointments', 'Your confirmed upcoming sessions', 'No upcoming sessions.')}
-      {renderAppList(doneList, 'Past & Cancelled', 'History of your past appointments', 'No past appointments.')}
+      {renderAppList(doneList, 'Completed and Cancelled', 'History of your past appointments', 'No past appointments.')}
 
       {/* Cancel Confirmation Modal */}
       {cancelPromptId && (
